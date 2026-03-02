@@ -3,6 +3,8 @@
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/backend/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/venv/Include" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/algebra_chatbot/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/algebra_chatbot/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/algebra_chatbot/ios/Flutter/ephemeral" />
