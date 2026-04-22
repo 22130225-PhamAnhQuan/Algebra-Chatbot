@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/theme/app_theme.dart';
 
+/// Logo hình vuông bo góc với ký hiệu ∑
+/// Dùng ở SplashScreen, LoginScreen, RegisterScreen
 class AppLogo extends StatelessWidget {
   final double size;
   final bool showText;
@@ -34,7 +36,7 @@ class AppLogo extends StatelessWidget {
           ),
           child: Center(
             child: Text(
-              'Q',
+              '∑',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: size * 0.5,
