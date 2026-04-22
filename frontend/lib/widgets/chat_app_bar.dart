@@ -38,7 +38,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           child: const Center(
             child: Text(
-              '∑',
+              'Q',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,

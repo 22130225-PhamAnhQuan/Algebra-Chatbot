@@ -35,6 +35,14 @@ class AppColors {
 
   // Divider
   static const divider = Color(0xFFE8E9F3);
+
+  // Dark Mode Colors
+  static const backgroundDark = Color(0xFF0F0F0F);
+  static const surfaceDark = Color(0xFF1E1E1E);
+  static const textPrimaryDark = Color(0xFFF2F2F7);
+  static const textSecondaryDark = Color(0xFFAEAFC8);
+  static const dividerDark = Color(0xFF2C2C2E);
+  static const inputBackgroundDark = Color(0xFF1C1C1E);
 }
 
 class AppTheme {
@@ -44,8 +52,7 @@ class AppTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         brightness: Brightness.light,
-        background: AppColors.background,
-        surface: AppColors.surface,
+        surface: AppColors.background,
         primary: AppColors.primary,
       ),
       scaffoldBackgroundColor: AppColors.background,
@@ -139,6 +146,73 @@ class AppTheme {
         ),
       ),
       dividerTheme: const DividerThemeData(color: AppColors.divider, thickness: 1),
+    );
+  }
+
+  static ThemeData get dark {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primary,
+        brightness: Brightness.dark,
+        surface: AppColors.backgroundDark,
+        primary: AppColors.primary,
+      ),
+      scaffoldBackgroundColor: AppColors.backgroundDark,
+      textTheme: GoogleFonts.dmSansTextTheme().copyWith(
+        displayLarge: GoogleFonts.dmSans(fontSize: 32, fontWeight: FontWeight.w700, color: AppColors.textPrimaryDark),
+        displayMedium: GoogleFonts.dmSans(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.textPrimaryDark),
+        headlineMedium: GoogleFonts.dmSans(fontSize: 22, fontWeight: FontWeight.w600, color: AppColors.textPrimaryDark),
+        titleLarge: GoogleFonts.dmSans(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimaryDark),
+        titleMedium: GoogleFonts.dmSans(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.textPrimaryDark),
+        bodyLarge: GoogleFonts.dmSans(fontSize: 15, fontWeight: FontWeight.w400, color: AppColors.textPrimaryDark),
+        bodyMedium: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w400, color: AppColors.textSecondaryDark),
+        labelLarge: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primary),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.inputBackgroundDark,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.dividerDark, width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        hintStyle: GoogleFonts.dmSans(color: AppColors.textHint, fontSize: 14),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          minimumSize: const Size(double.infinity, 54),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          textStyle: GoogleFonts.dmSans(fontSize: 16, fontWeight: FontWeight.w600),
+          elevation: 0,
+        ),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.backgroundDark,
+        elevation: 0,
+        titleTextStyle: GoogleFonts.dmSans(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimaryDark),
+        iconTheme: const IconThemeData(color: AppColors.textPrimaryDark),
+      ),
+      cardTheme: CardThemeData(
+        color: AppColors.surfaceDark,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppColors.dividerDark, width: 1),
+        ),
+      ),
+      dividerTheme: const DividerThemeData(
+          color: AppColors.dividerDark,
+          thickness: 1
+      ),
     );
   }
 }
