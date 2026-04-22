@@ -3,16 +3,16 @@
 # =========================
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
+python-multipart==0.0.9
 
 # =========================
 # DATABASE
 # =========================
 SQLAlchemy==2.0.36
-psycopg2-binary==2.9.9   # PostgreSQL
-# nếu dùng SQLite thì vẫn giữ SQLAlchemy là đủ
+psycopg2-binary==2.9.9     # Driver cho PostgreSQL
 
 # =========================
-# VALIDATION
+# VALIDATION & SETTINGS
 # =========================
 pydantic==2.9.2
 pydantic-settings==2.5.2
@@ -25,27 +25,20 @@ python-jose==3.3.0
 passlib[bcrypt]==1.7.4
 
 # =========================
-# HTTP CLIENT
+# HTTP CLIENT (Gọi Phi-3 / Mathpix)
 # =========================
 httpx==0.27.2
 
 # =========================
-# ENV CONFIG
+# MATH SOLVER & OCR (Cốt lõi Đồ án)
+# =========================
+sympy==1.13.3              # Thư viện giải toán chính xác
+pytesseract==0.3.13        # Thư viện OCR (Nếu dùng Tesseract)
+Pillow==10.4.0             # Thư viện xử lý ảnh (Đi kèm OCR)
+
+# =========================
+# UTILS & DEV TOOLS
 # =========================
 python-dotenv==1.0.1
-
-# =========================
-# LOGGING
-# =========================
 loguru==0.7.2
-
-# =========================
-# OPTIONAL AI (nếu chạy local model)
-# =========================
-transformers==4.44.2
-torch==2.4.1
-
-# =========================
-# DEV TOOLS
-# =========================
 watchfiles==0.24.0
