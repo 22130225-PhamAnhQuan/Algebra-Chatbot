@@ -240,7 +240,7 @@ class _LogoWidget extends StatelessWidget {
           ),
           child: const Center(
             child: Text(
-              '∑',
+              'Q',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 46,
