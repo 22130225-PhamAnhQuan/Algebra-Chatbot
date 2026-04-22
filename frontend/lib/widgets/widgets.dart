@@ -6,6 +6,5 @@ export 'chat_bubble.dart';
 export 'empty_state.dart';
 export 'history_card.dart';
 export 'image_picker_sheet.dart';
-export 'input_bar.dart';
 export 'quick_suggestions.dart';
 export 'settings_tile.dart';

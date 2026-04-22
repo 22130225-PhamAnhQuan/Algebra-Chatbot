@@ -11,7 +11,7 @@ class EmptyState extends StatelessWidget {
 
   const EmptyState({
     super.key,
-    this.emoji = '∑',
+    this.emoji = 'Q',
     this.title = 'Bắt đầu giải toán!',
     this.subtitle = 'Nhập bài toán đại số vào ô bên dưới',
   });
