@@ -1,18 +1,10 @@
 // lib/screens/login_screen.dart
-import 'package:algebra_chatbot/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-
 import '../core/theme/app_theme.dart';
-import '../widgets/widgets.dart';
-import '../services/api_service.dart';
-import 'forgotpw_screen.dart';
-import 'profile_screen.dart';
+import '../widgets/app_logo.dart';
+import 'chat_screen.dart';
 import 'register_screen.dart';
-import 'home_screen.dart'; // Đảm bảo import HomeScreen nếu bạn muốn vào đó
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,7 +13,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _obscure = true;
@@ -34,10 +27,14 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _animCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
-    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero).animate(
-      CurvedAnimation(parent: _animCtrl, curve: Curves.easeOutCubic),
+    _animCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
     );
+    _slideAnim = Tween<Offset>(
+      begin: const Offset(0, 0.15),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _animCtrl, curve: Curves.easeOutCubic));
     _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _animCtrl, curve: Curves.easeIn),
     );
@@ -53,115 +50,44 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   }
 
   Future<void> _login() async {
-    try {
-      if (_emailCtrl.text.trim().isEmpty || _passCtrl.text.isEmpty) {
-        throw 'Vui lòng nhập đầy đủ Email và Mật khẩu';
-      }
-
-      setState(() => _loading = true);
-
-      final token = await ApiService.login(
-        email: _emailCtrl.text.trim(),
-        password: _passCtrl.text,
-      );
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', token);
-
-      if (mounted) {
-        await context.read<AuthProvider>().loadUser();
-      }
-
-      if (!mounted) return;
-      setState(() => _loading = false);
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
-
-    } catch (e) {
-      setState(() => _loading = false);
-
-      String rawError = e.toString();
-      String friendlyMessage = 'Đã có lỗi xảy ra. Vui lòng thử lại';
-
-      if (rawError.contains('value is not a valid email address')) {
-        friendlyMessage = 'Email không đúng định dạng (thiếu dấu chấm hoặc sai ký tự)';
-      } else if (rawError.contains('not_found') || rawError.contains('401')) {
-        friendlyMessage = 'Email hoặc mật khẩu không chính xác';
-      } else if (rawError.contains('Connection refused')) {
-        friendlyMessage = 'Không thể kết nối đến máy chủ';
-      } else {
-        // Nếu không khớp các lỗi trên thì mới hiện thông báo gốc (đã lọc bớt rác)
-        friendlyMessage = rawError.replaceAll('Exception: ', '');
-      }
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            friendlyMessage, // Hiện câu thông báo đã "dịch"
-            style: GoogleFonts.dmSans(fontWeight: FontWeight.w500, color: Colors.white),
-          ),
-          backgroundColor: Colors.red.shade600,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
-    }
-  }
-
-  Future<void> _handleGoogleAuth() async {
     setState(() => _loading = true);
-    try {
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        serverClientId: '386538483858-t13b687hnu9hqee8r375vt7cb4q75ajl.apps.googleusercontent.com',
-      );
-      final GoogleSignInAccount? account = await googleSignIn.signIn();
-      if (account == null) {
-        setState(() => _loading = false);
-        return;
-      }
-      final GoogleSignInAuthentication auth = await account.authentication;
-      final String? idToken = auth.idToken;
-      if (idToken == null) throw 'Không lấy được Token từ Google';
-
-      final accessToken = await ApiService.loginWithGoogle(idToken);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', accessToken);
-
-      if (mounted) {
-        await context.read<AuthProvider>().loadUser();
-      }
-
-      if (!mounted) return;
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
-    } catch (e) {
+    await Future.delayed(const Duration(milliseconds: 1200));
+    if (mounted) {
       setState(() => _loading = false);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(builder: (_) => const ChatScreen()),
+      // );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // 💡 LẤY THÔNG TIN THEME TẠI ĐÂY ĐỂ DÙNG MÀU ĐỘNG
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor, // Tự động đổi Sáng/Tối
       body: Stack(
         children: [
           // Background decoration
           Positioned(
-            top: -60, right: -60,
+            top: -60,
+            right: -60,
             child: Container(
-              width: 200, height: 200,
+              width: 200,
+              height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withOpacity(isDark ? 0.03 : 0.06),
+                color: AppColors.primary.withOpacity(0.06),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -40,
+            left: -40,
+            child: Container(
+              width: 160,
+              height: 160,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primaryLight.withOpacity(0.08),
               ),
             ),
           ),
@@ -183,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         style: GoogleFonts.dmSans(
                           fontSize: 26,
                           fontWeight: FontWeight.w800,
-                          color: theme.colorScheme.onSurface, // Tự trắng khi tối
+                          color: AppColors.textPrimary,
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -192,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         'Đăng nhập để tiếp tục giải toán',
                         style: GoogleFonts.dmSans(
                           fontSize: 15,
-                          color: theme.colorScheme.onSurface.withOpacity(0.6), // Tự đổi màu xám/trắng
+                          color: AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 36),
@@ -201,10 +127,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       TextField(
                         controller: _emailCtrl,
                         keyboardType: TextInputType.emailAddress,
-                        style: TextStyle(color: theme.colorScheme.onSurface),
                         decoration: const InputDecoration(
-                          hintText: 'youremail@email.com',
-                          prefixIcon: Icon(Icons.email_outlined, size: 20),
+                          hintText: 'your@email.com',
+                          prefixIcon: Icon(
+                            Icons.email_outlined,
+                            color: AppColors.textHint,
+                            size: 20,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -213,13 +142,23 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       TextField(
                         controller: _passCtrl,
                         obscureText: _obscure,
-                        style: TextStyle(color: theme.colorScheme.onSurface),
                         decoration: InputDecoration(
                           hintText: '••••••••',
-                          prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                          prefixIcon: const Icon(
+                            Icons.lock_outline,
+                            color: AppColors.textHint,
+                            size: 20,
+                          ),
                           suffixIcon: IconButton(
-                            icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined, size: 20),
-                            onPressed: () => setState(() => _obscure = !_obscure),
+                            icon: Icon(
+                              _obscure
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: AppColors.textHint,
+                              size: 20,
+                            ),
+                            onPressed: () =>
+                                setState(() => _obscure = !_obscure),
                           ),
                         ),
                       ),
@@ -227,20 +166,23 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
+                          onPressed: () {},
                           child: const Text('Quên mật khẩu?'),
                         ),
                       ),
                       const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton(
-                          onPressed: _loading ? null : _login,
-                          child: _loading
-                              ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
-                              : const Text('Đăng nhập'),
-                        ),
+                      ElevatedButton(
+                        onPressed: _loading ? null : _login,
+                        child: _loading
+                            ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                            : const Text('Đăng nhập'),
                       ),
                       const SizedBox(height: 24),
                       _Divider(),
@@ -248,7 +190,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       _SocialLoginButton(
                         icon: '🌐',
                         label: 'Tiếp tục với Google',
-                        onTap: _handleGoogleAuth,
+                        onTap: _login,
                       ),
                       const SizedBox(height: 32),
                       Center(
@@ -257,10 +199,25 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           children: [
                             Text(
                               'Chưa có tài khoản? ',
-                              style: GoogleFonts.dmSans(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
+                              style: GoogleFonts.dmSans(
+                                color: AppColors.textSecondary,
+                                fontSize: 14,
+                              ),
                             ),
                             TextButton(
-                              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen())),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const RegisterScreen(),
+                                  ),
+                                );
+                              },
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
                               child: const Text('Đăng ký ngay'),
                             ),
                           ],
@@ -279,7 +236,56 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   }
 }
 
-// 💡 CÁC WIDGET CON ĐÃ ĐƯỢC ĐỒNG BỘ MÀU THEME
+class _LogoWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Glow ring
+        Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.primary.withOpacity(0.08),
+          ),
+        ),
+        Container(
+          width: 96,
+          height: 96,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.primary, AppColors.primaryLight],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withOpacity(0.4),
+                blurRadius: 32,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: const Center(
+            child: Text(
+              '∑',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 46,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+// ─── Private Widgets ─────────────────────────────────────────────────────────
+
 class _FieldLabel extends StatelessWidget {
   final String label;
   const _FieldLabel({required this.label});
@@ -291,7 +297,7 @@ class _FieldLabel extends StatelessWidget {
       style: GoogleFonts.dmSans(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: Theme.of(context).colorScheme.onSurface,
+        color: AppColors.textPrimary,
       ),
     );
   }
@@ -300,15 +306,20 @@ class _FieldLabel extends StatelessWidget {
 class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Row(
       children: [
-        Expanded(child: Divider(color: theme.dividerTheme.color)),
+        const Expanded(child: Divider()),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text('hoặc', style: GoogleFonts.dmSans(fontSize: 13, color: theme.colorScheme.onSurface.withOpacity(0.5))),
+          child: Text(
+            'hoặc',
+            style: GoogleFonts.dmSans(
+              fontSize: 13,
+              color: AppColors.textHint,
+            ),
+          ),
         ),
-        Expanded(child: Divider(color: theme.dividerTheme.color)),
+        const Expanded(child: Divider()),
       ],
     );
   }
@@ -319,18 +330,21 @@ class _SocialLoginButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
-  const _SocialLoginButton({required this.icon, required this.label, required this.onTap});
+  const _SocialLoginButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(double.infinity, 54),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        side: BorderSide(color: theme.dividerTheme.color ?? AppColors.divider, width: 1.5),
-        backgroundColor: theme.colorScheme.surface, // Tự xám đen khi tối
+        side: const BorderSide(color: AppColors.divider, width: 1.5),
+        backgroundColor: AppColors.surface,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -342,7 +356,7 @@ class _SocialLoginButton extends StatelessWidget {
             style: GoogleFonts.dmSans(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: theme.colorScheme.onSurface, // Chữ tự trắng
+              color: AppColors.textPrimary,
             ),
           ),
         ],
