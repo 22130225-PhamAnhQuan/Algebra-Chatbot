@@ -1,11 +1,31 @@
 from fastapi import FastAPI
-from app.db.database import engine, Base
-from app.models import user, problem, solution, message
+from app.db.database import engine
+from app.db.database import Base
 
-Base.metadata.create_all(bind=engine)
+# IMPORT MODELS (QUAN TRỌNG)
+from app import models
+
+# ROUTERS
+from app.routers.auth_router import router as auth_router
+from app.routers.problem_router import router as problem_router
+from app.routers.chat_router import router as chat_router
+from app.routers.math_router import router as math_router
+from app.routers.user_router import router as user_router
+from app.routers.formula_router import router as formula_router
 
 app = FastAPI()
 
+# AUTO CREATE TABLE
+Base.metadata.create_all(bind=engine)
+
+# ROUTES
+app.include_router(auth_router)
+app.include_router(problem_router)
+app.include_router(chat_router)
+app.include_router(math_router)
+app.include_router(user_router)
+app.include_router(formula_router)
+
 @app.get("/")
 def root():
-    return {"message": "Backend OK"}
+    return {"message": "Algebra Chatbot API is running 🚀"}

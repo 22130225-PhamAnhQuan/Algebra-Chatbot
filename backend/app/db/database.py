@@ -1,9 +1,6 @@
-# app/database.py
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-
-DATABASE_URL = "postgresql://postgres:123456@localhost:5432/algebra_db"
+from app.core.config import DATABASE_URL
 
 engine = create_engine(DATABASE_URL)
 
@@ -16,7 +13,6 @@ SessionLocal = sessionmaker(
 Base = declarative_base()
 
 
-# Dependency cho FastAPI
 def get_db():
     db = SessionLocal()
     try:
