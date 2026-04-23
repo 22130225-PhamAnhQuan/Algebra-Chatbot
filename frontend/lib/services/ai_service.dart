@@ -1,3 +1,4 @@
+
 // lib/services/ai_service.dart
 //
 // Hỗ trợ 2 provider: OpenAI (GPT-4o) và Google Gemini.
@@ -286,3 +287,4 @@ class GeminiService implements AiService {
     }
   }
 }
+

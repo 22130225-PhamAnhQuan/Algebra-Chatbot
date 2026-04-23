@@ -3,6 +3,11 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 
+from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
+from app.db.database import Base
+
 class User(Base):
     __tablename__ = "users"
 
@@ -11,9 +16,9 @@ class User(Base):
     name = Column(String(255), nullable=False)
     password = Column(String(255), nullable=False)
     role = Column(String(20), default="USER")
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, server_default=func.now())
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    # relationships
-    problems = relationship("Problem", back_populates="user", cascade="all, delete")
-    conversations = relationship("Conversation", back_populates="user")
+    # Relationships
+    problems = relationship("Problem", back_populates="user", cascade="all, delete-orphan")
+    conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")

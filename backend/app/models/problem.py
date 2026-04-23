@@ -3,17 +3,22 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
+from app.db.database import Base
+
 class Problem(Base):
     __tablename__ = "problems"
 
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
-
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     content = Column(Text, nullable=False)
     input_type = Column(String(20), default="text")
+    image_url = Column(String(500), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    # relationships
+    # Relationships
     user = relationship("User", back_populates="problems")
-    solution = relationship("Solution", back_populates="problem", uselist=False)
+    solutions = relationship("Solution", back_populates="problem", cascade="all, delete-orphan")
+    conversations = relationship("Conversation", back_populates="problem")

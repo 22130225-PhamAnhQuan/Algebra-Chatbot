@@ -3,6 +3,7 @@
 // Map tới app/routers/solve_router.py:
 //   POST /solve/math
 //
+//   // SolveResult({required this.solution, this.steps, this.graphUrl});
 // Và app/routers/math_router.py:
 //   POST /math/solve
 //   POST /math/graph
