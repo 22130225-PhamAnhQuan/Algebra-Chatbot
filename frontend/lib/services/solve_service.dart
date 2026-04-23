@@ -14,7 +14,7 @@
 //   final String? steps;
 //   final String? graphUrl;
 //
-//   SolveResult({required this.solution, this.steps, this.graphUrl});
+//   // SolveResult({required this.solution, this.steps, this.graphUrl});
 //
 //   factory SolveResult.fromJson(Map<String, dynamic> j) => SolveResult(
 //         solution: j['solution']?.toString() ?? j['result']?.toString() ?? '',

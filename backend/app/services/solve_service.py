@@ -1,76 +1,55 @@
-import time
 from sqlalchemy.orm import Session
-from app.models import Problem, Solution, History, AILog
+from app.services.solver.ai_solver import AISolver
+from app.services.ocr_service import OcrService
+from app.models.problem import Problem
+from app.models.solution import Solution
+from app.models.history import History
+from app.models.ai_log import AILog
+import time
 
 
-class SolverService:
-    @staticmethod
-    def solve_and_record(db: Session, user_id: int, content: str, input_type: str, image_url: str = None):
+class SolveService:
+    @classmethod
+    async def handle_math_solving(
+            cls, db: Session, user_id: int, text: str = None, image_bytes: bytes = None
+    ):
         start_time = time.time()
+        input_type = "text"
+        raw_text = text
 
-        # 1. Lưu Problem
-        db_problem = Problem(
-            user_id=user_id,
-            content=content,
-            input_type=input_type,
-            image_url=image_url
-        )
-        db.add(db_problem)
-        db.commit()
-        db.refresh(db_problem)
+        # 1. Xử lý OCR nếu có ảnh [cite: 11, 16, 23]
+        if image_bytes:
+            input_type = "image"
+            raw_text = await OcrService.extract_text_from_image(image_bytes)
 
-        # 2. Gọi AI (Giả lập - Quan thay bằng gọi Gemini API thật nhé)
-        # Output mong muốn từ AI: Kết quả cuối, Các bước, và mã Latex
-        ai_response = {
-            "result": "x = 1/2; x = -3",
-            "steps": [
-                "Xác định hệ số: a = 2, b = 5, c = -3",
-                "Tính biệt thức delta: Δ = b² - 4ac = 5² - 4.2.(-3) = 49",
-                "Vì Δ > 0, phương trình có hai nghiệm phân biệt",
-                "Áp dụng công thức nghiệm ta được x₁ = 1/2 và x₂ = -3"
-            ],
-            "latex": r"x = \frac{-b \pm \sqrt{\Delta}}{2a}",
-            "tokens": 150
-        }
-
-        # 3. Lưu Solution
-        db_solution = Solution(
-            problem_id=db_problem.id,
-            result=ai_response["result"],
-            steps="|".join(ai_response["steps"]),  # Gộp mảng thành chuỗi để lưu
-            latex=ai_response["latex"],
-            model="gemini-1.5-flash"
-        )
-        db.add(db_solution)
-        db.commit()
-        db.refresh(db_solution)
-
-        # 4. Lưu History (Để Quan hiện ở màn Lịch sử)
-        db_history = History(
-            user_id=user_id,
-            problem_id=db_problem.id,
-            solution_id=db_solution.id
-        )
-        db.add(db_history)
-
-        # 5. Ghi AI Log (Dùng cho báo cáo thống kê latency/token)
+        # 2. Giải toán qua AI Pipeline [cite: 10, 15, 36]
+        solution_data = await AISolver.solve(raw_text)
         latency = int((time.time() - start_time) * 1000)
-        db_log = AILog(
-            user_id=user_id,
-            problem_id=db_problem.id,
-            input=content,
-            output=ai_response["result"],
-            model="gemini-1.5-flash",
-            latency_ms=latency,
-            status="success",
-            tokens_used=ai_response["tokens"]
+
+        # 3. Lưu vào Database (PostgreSQL) [cite: 18, 29, 37]
+        # Lưu Problem
+        new_problem = Problem(user_id=user_id, content=raw_text, input_type=input_type)
+        db.add(new_problem)
+        db.flush()  # Để lấy ID
+
+        # Lưu Solution [cite: 18, 29]
+        new_solution = Solution(
+            problem_id=new_problem.id,
+            result=solution_data['result'],
+            steps="|".join(solution_data['steps']),
+            latex=solution_data['latex'],
+            model="phi3-mini + sympy"
         )
-        db.add(db_log)
+        db.add(new_solution)
+        db.flush()
+
+        # Lưu History & Log [cite: 18, 19]
+        db.add(History(user_id=user_id, problem_id=new_problem.id, solution_id=new_solution.id))
+        db.add(AILog(
+            user_id=user_id, problem_id=new_problem.id,
+            input=raw_text, output=solution_data['result'],
+            latency_ms=latency, status="success"
+        ))
 
         db.commit()
-
-        return {
-            "problem": db_problem,
-            "solution": db_solution,
-            "steps_list": ai_response["steps"]  # Trả về list cho Flutter dễ hiện
-        }
+        return solution_data

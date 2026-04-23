@@ -5,141 +5,40 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6182cbb8-7603-4404-b164-1ab3702e46d6" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/.metadata" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/analysis_options.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/analysis_options.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/app/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/app/src/debug/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/app/src/debug/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/app/src/main/kotlin/com/example/algebra_chatbot/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/app/src/main/kotlin/com/example/algebra_chatbot/MainActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/app/src/main/res/drawable-v21/launch_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/app/src/main/res/drawable-v21/launch_background.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/app/src/main/res/drawable/launch_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/app/src/main/res/drawable/launch_background.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/app/src/main/res/mipmap-hdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/app/src/main/res/mipmap-hdpi/ic_launcher.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/app/src/main/res/mipmap-mdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/app/src/main/res/mipmap-mdpi/ic_launcher.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/app/src/main/res/values-night/styles.xml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/app/src/main/res/values-night/styles.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/app/src/main/res/values/styles.xml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/app/src/main/res/values/styles.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/app/src/profile/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/app/src/profile/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/gradle.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/android/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/android/settings.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Flutter/AppFrameworkInfo.plist" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Flutter/AppFrameworkInfo.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Flutter/Debug.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Flutter/Debug.xcconfig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Flutter/Release.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Flutter/Release.xcconfig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner.xcworkspace/contents.xcworkspacedata" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner.xcworkspace/contents.xcworkspacedata" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/AppDelegate.swift" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/AppDelegate.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Base.lproj/LaunchScreen.storyboard" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Base.lproj/LaunchScreen.storyboard" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Base.lproj/Main.storyboard" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Base.lproj/Main.storyboard" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Info.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/Runner/Runner-Bridging-Header.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/Runner/Runner-Bridging-Header.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/ios/RunnerTests/RunnerTests.swift" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/ios/RunnerTests/RunnerTests.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/lib/models/message_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/models/message_model.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/lib/models/user_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/models/user_model.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/lib/screens/chat_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/screens/chat_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/lib/screens/home_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/screens/home_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/lib/screens/login_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/screens/login_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/lib/screens/register_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/screens/register_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/linux/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/linux/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/linux/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/linux/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/linux/flutter/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/linux/flutter/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/linux/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/linux/flutter/generated_plugin_registrant.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/linux/flutter/generated_plugin_registrant.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/linux/flutter/generated_plugin_registrant.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/linux/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/linux/flutter/generated_plugins.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/linux/runner/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/linux/runner/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/linux/runner/main.cc" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/linux/runner/main.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/linux/runner/my_application.cc" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/linux/runner/my_application.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/linux/runner/my_application.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/linux/runner/my_application.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Flutter/Flutter-Debug.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Flutter/Flutter-Debug.xcconfig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Flutter/Flutter-Release.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Flutter/Flutter-Release.xcconfig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner.xcodeproj/project.pbxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner.xcworkspace/contents.xcworkspacedata" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner.xcworkspace/contents.xcworkspacedata" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/AppDelegate.swift" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/AppDelegate.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/Base.lproj/MainMenu.xib" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/Base.lproj/MainMenu.xib" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/Configs/AppInfo.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/Configs/AppInfo.xcconfig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/Configs/Debug.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/Configs/Debug.xcconfig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/Configs/Release.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/Configs/Release.xcconfig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/Configs/Warnings.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/Configs/Warnings.xcconfig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/DebugProfile.entitlements" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/DebugProfile.entitlements" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/Info.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/MainFlutterWindow.swift" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/MainFlutterWindow.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/Runner/Release.entitlements" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Runner/Release.entitlements" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/macos/RunnerTests/RunnerTests.swift" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/RunnerTests/RunnerTests.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/test/widget_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/test/widget_test.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/web/favicon.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/web/favicon.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/web/icons/Icon-192.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/web/icons/Icon-192.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/web/icons/Icon-512.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/web/icons/Icon-512.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/web/icons/Icon-maskable-192.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/web/icons/Icon-maskable-192.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/web/icons/Icon-maskable-512.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/web/icons/Icon-maskable-512.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/web/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/web/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/web/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/web/manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/flutter/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/flutter/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/flutter/generated_plugin_registrant.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/flutter/generated_plugin_registrant.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/flutter/generated_plugins.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/runner/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/runner/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/runner/Runner.rc" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/runner/Runner.rc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/runner/flutter_window.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/runner/flutter_window.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/runner/flutter_window.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/runner/flutter_window.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/runner/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/runner/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/runner/resource.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/runner/resource.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/runner/resources/app_icon.ico" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/runner/resources/app_icon.ico" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/runner/runner.exe.manifest" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/runner/runner.exe.manifest" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/runner/utils.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/runner/utils.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/runner/utils.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/runner/utils.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/runner/win32_window.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/runner/win32_window.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algebra_chatbot/windows/runner/win32_window.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/runner/win32_window.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/ai_log.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/ai_log.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/conversation.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/conversation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/history.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/history.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/message.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/message.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/problem.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/problem.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/refresh_token.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/refresh_token.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/solution.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/solution.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/chat_router.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/chat_router.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/math_router.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/problem_router.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/problem_router.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/solve_router.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/solve_router.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/schemas/chat.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/chat.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/schemas/problem.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/problem.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/schemas/solve.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/solve.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/services/chat_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/services/chat_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/services/solve_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/services/solve_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/services/solver/ai_solver.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/services/solver/ai_solver.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/services/ai_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/ai_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/services/auth_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/auth_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/services/image_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/image_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/services/solve_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/solve_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/services/storage_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/storage_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/services/user_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/user_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/widgets/widgets.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/widgets/widgets.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/linux/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/linux/flutter/generated_plugin_registrant.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/linux/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/linux/flutter/generated_plugins.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/flutter/generated_plugins.cmake" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -164,23 +63,36 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.17&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;PyConsoleConfigurable.Python Console&quot;,
-    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Flutter.main.dart.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "main",
+    "io.flutter.reload.alreadyRun": "true",
+    "kotlin-language-version-configured": "true",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.17",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "PyConsoleConfigurable.Python Console",
+    "show.migrate.to.gradle.popup": "false"
   }
-}</component>
+}]]></component>
+  <component name="RunManager">
+    <configuration name="main.dart" type="FlutterRunConfigurationType" factoryName="Flutter" temporary="true" nameIsGenerated="true">
+      <option name="filePath" value="$PROJECT_DIR$/frontend/lib/main.dart" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Flutter.main.dart" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
