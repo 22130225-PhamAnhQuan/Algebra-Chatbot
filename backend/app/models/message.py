@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.db.database import Base
@@ -15,3 +15,7 @@ class Message(Base):
 
     # Relationships
     conversation = relationship("Conversation", back_populates="messages")
+    __table_args__ = (
+        CheckConstraint(sender.in_(['USER', 'BOT']), name='check_sender'),
+        CheckConstraint(type.in_(['text', 'image', 'latex']), name='check_message_type'),
+    )

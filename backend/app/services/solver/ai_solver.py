@@ -14,23 +14,37 @@ class AISolver:
             "model": "phi3:mini",
             "prompt": prompt,
             "stream": False,
-            "format": "json"
+            "format": "json",
+            "options": {
+                "temperature": 0.1,
+                "num_predict": 512,
+                "num_thread": 4
+            }
         }
         try:
-            async with httpx.AsyncClient(timeout=180.0) as client:  # Tăng timeout lên 100s
+            async with httpx.AsyncClient(timeout=180.0) as client:
                 response = await client.post(OLLAMA_URL, json=payload)
+
                 if response.status_code != 200:
                     print(f"Ollama Error Status: {response.status_code}")
-                    raise AIInferenceError()
+                    return {"type": "khong_ro", "expression": "", "result": "Lỗi kết nối AI"}
 
                 result = response.json()
-                return json.loads(result['response'])
+                raw_response = result['response'].strip()
+
+                # ĐƯA PHẦN XỬ LÝ JSON RA NGOÀI EXCEPT - Nằm trong luồng chạy thành công
+                json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)
+                if json_match:
+                    return json.loads(json_match.group())
+                return json.loads(raw_response)
+
         except httpx.ConnectError:
-            print("LỖI: Backend không kết nối được tới Ollama. Kiểm tra OLLAMA_URL!")
-            raise AIInferenceError()
+            print("LỖI: Không thể kết nối tới Ollama. Hãy kiểm tra OLLAMA_URL!")
+            return {"type": "khong_ro", "expression": ""}
         except Exception as e:
-            print(f"LỖI HỆ THỐNG: {type(e).__name__} - {e}")
-            raise AIInferenceError()
+            print(f"LỖI HỆ THỐNG TRONG call_phi3: {type(e).__name__} - {e}")
+            # Đảm bảo luôn trả về dict để không gây lỗi NoneType ở hàm solve
+            return {"type": "khong_ro", "expression": ""}
 
     @classmethod
     def process_math(cls, math_type: str, expression: str):
