@@ -17,10 +17,10 @@ Các dạng toán hỗ trợ (type):
 - "khong_ro": Không phải toán hoặc không đủ dữ kiện.
 
 CHỈ TRẢ VỀ ĐÚNG 1 ĐỐI TƯỢNG JSON CÓ CẤU TRÚC SAU (KHÔNG thêm bất kỳ giải thích nào):
-{
+{{
     "type": "tên_dạng_toán",
-    "expression": "biểu thức toán học (ví dụ: x**2 - 5*x + 6 = 0, hoặc biểu thức trống nếu là toán đố)"
-}
+    "expression": "biểu thức toán học"
+}}
 """
 
     # 2. Prompt dùng để viết lời giải chi tiết dựa trên kết quả của SymPy

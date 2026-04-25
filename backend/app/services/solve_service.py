@@ -32,22 +32,38 @@ class SolveService:
         db.add(new_problem)
         db.flush()  # Để lấy ID
 
-        # Lưu Solution [cite: 18, 29]
+        raw_steps = solution_data.get('steps', [])
+
+        # 2. Ép kiểu từng phần tử về chuỗi (đề phòng AI trả về dict)
+        formatted_steps = []
+        for step in raw_steps:
+            if isinstance(step, str):
+                formatted_steps.append(step)
+            elif isinstance(step, dict):
+                # Nếu là dict, lấy giá trị đầu tiên của nó
+                val = list(step.values())[0] if step.values() else ""
+                formatted_steps.append(str(val))
+            else:
+                formatted_steps.append(str(step))
+
+        # 3. Lưu Solution với danh sách đã chuẩn hóa
         new_solution = Solution(
             problem_id=new_problem.id,
-            result=solution_data['result'],
-            steps="|".join(solution_data['steps']),
-            latex=solution_data['latex'],
+            result=str(solution_data.get('result', '')),
+            steps="|".join(formatted_steps),  # Nối các chuỗi an toàn bằng dấu |
+            latex=solution_data.get('latex', ''),
             model="phi3-mini + sympy"
         )
+        # ---------------------------------------
+
         db.add(new_solution)
         db.flush()
 
-        # Lưu History & Log [cite: 18, 19]
+        # Lưu History & Log
         db.add(History(user_id=user_id, problem_id=new_problem.id, solution_id=new_solution.id))
         db.add(AILog(
             user_id=user_id, problem_id=new_problem.id,
-            input=raw_text, output=solution_data['result'],
+            input=raw_text, output=str(solution_data.get('result', '')),
             latency_ms=latency, status="success"
         ))
 
