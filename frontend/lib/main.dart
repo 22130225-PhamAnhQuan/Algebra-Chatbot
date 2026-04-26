@@ -1,12 +1,14 @@
 // main.dart
 import 'package:algebra_chatbot/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
-import 'screens/profile_screen.dart';
 import 'package:provider/provider.dart';
+import 'providers/chat_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/history_provider.dart';
+import 'providers/formula_provider.dart';
 import '../core/theme/app_theme.dart';
+import 'providers/navigation_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,8 +16,12 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => FormulaProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => HistoryProvider()),
+        ChangeNotifierProvider(create: (_) => NavigationProvider())
       ],
       child: const MyApp(),
     ),

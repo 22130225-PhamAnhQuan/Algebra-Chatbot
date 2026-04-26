@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_math_fork/flutter_math.dart'; // Thư viện render Toán học thần thánh
 import '../core/theme/app_theme.dart';
 import '../models/formula_model.dart';
 
 class FormulaDetailScreen extends StatelessWidget {
   final Formula data;
 
-  // Constructor nhận dữ liệu từ FormulaScreen truyền sang
+  // Constructor nhận dữ liệu từ màn hình trước truyền sang
   const FormulaDetailScreen({super.key, required this.data});
 
   @override
@@ -34,7 +35,7 @@ class FormulaDetailScreen extends StatelessWidget {
 
             const SizedBox(height: 25),
 
-            // 2. Khung hiển thị công thức chính (To, rõ ràng)
+            // 2. Khung hiển thị công thức chính (Dùng LaTeX)
             _buildMainFormulaBox(),
 
             const SizedBox(height: 35),
@@ -58,7 +59,7 @@ class FormulaDetailScreen extends StatelessWidget {
               ),
             ],
 
-            const SizedBox(height: 50), // Khoảng trống dưới cùng
+            const SizedBox(height: 50), // Khoảng trống dưới cùng để cuộn không bị cấn
           ],
         ),
       ),
@@ -97,7 +98,7 @@ class FormulaDetailScreen extends StatelessWidget {
     );
   }
 
-  // --- Widget: Khung công thức nổi bật ---
+  // --- Widget: Khung công thức nổi bật (Đã nâng cấp LaTeX) ---
   Widget _buildMainFormulaBox() {
     return Container(
       width: double.infinity,
@@ -117,13 +118,30 @@ class FormulaDetailScreen extends StatelessWidget {
           )
         ],
       ),
-      child: SelectableText(
-        data.formula,
-        textAlign: TextAlign.center,
-        style: GoogleFonts.firaCode(
-          fontSize: 22,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
+      // Bọc trong Center và ScrollView để đề phòng công thức quá dài
+      child: Center(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(), // Hiệu ứng nảy mượt mà khi cuộn ngang
+          child: Math.tex(
+            data.formula, // Chuỗi mã LaTeX lấy từ Backend
+            textStyle: const TextStyle(
+              fontSize: 26, // Kích thước chữ to, rõ nét
+              color: Colors.white,
+            ),
+            // Phao cứu sinh: Nếu chuỗi LaTeX bị lỗi cú pháp, quay về hiển thị text thường
+            onErrorFallback: (FlutterMathException err) {
+              return SelectableText(
+                data.formula,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.firaCode(
+                  fontSize: 20,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -167,7 +185,7 @@ class FormulaDetailScreen extends StatelessWidget {
         content,
         style: const TextStyle(
           fontSize: 16,
-          height: 1.6,
+          height: 1.6, // Giãn dòng cho dễ đọc
         ),
       ),
     );

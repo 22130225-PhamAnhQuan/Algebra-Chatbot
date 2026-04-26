@@ -1,29 +1,34 @@
-class HistoryModel {
+class HistoryItem {
   final int id;
+  final DateTime createdAt;
   final String problemContent;
   final String inputType;
   final String result;
-  final String steps;
+  final List<String> steps;
   final String latex;
-  final DateTime createdAt;
 
-  HistoryModel({
+  HistoryItem({
     required this.id,
+    required this.createdAt,
     required this.problemContent,
     required this.inputType,
     required this.result,
     required this.steps,
     required this.latex,
-    required this.createdAt,
   });
 
-  factory HistoryModel.fromJson(Map<String, dynamic> json) => HistoryModel(
-    id: json['id'],
-    problemContent: json['problem_content'],
-    inputType: json['input_type'],
-    result: json['result'] ?? '',
-    steps: json['steps'] ?? '',
-    latex: json['latex'] ?? '',
-    createdAt: DateTime.parse(json['created_at']),
-  );
+  factory HistoryItem.fromJson(Map<String, dynamic> json) {
+    return HistoryItem(
+      id: json['id'],
+      createdAt: DateTime.parse(json['created_at']),
+      problemContent: json['problem_content'] ?? "",
+      inputType: json['input_type'] ?? "text",
+      result: json['result'] ?? "",
+      // Tách chuỗi từ Database (cách nhau bởi dấu |) thành danh sách các bước
+      steps: (json['steps'] as String?)?.split('|')
+          .where((s) => s.trim().isNotEmpty)
+          .toList() ?? [],
+      latex: json['latex'] ?? "",
+    );
+  }
 }

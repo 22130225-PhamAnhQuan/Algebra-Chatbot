@@ -14,8 +14,12 @@ class FormulaScreen extends StatefulWidget {
 
 class _FormulaScreenState extends State<FormulaScreen> {
   int _selectedGrade = 6;
-  List<Formula> allFormulas = []; // Lưu gốc
-  List<Formula> filteredFormulas = []; // Hiển thị sau khi search
+
+  // SỬ DỤNG CACHE LOCAL: Lưu dữ liệu đã tải để không load lại khi chuyển Tab
+  final Map<int, List<Formula>> _cachedData = {};
+
+  List<Formula> allFormulas = [];
+  List<Formula> filteredFormulas = [];
   bool isLoading = true;
   String error = '';
   final TextEditingController _searchController = TextEditingController();
@@ -26,20 +30,49 @@ class _FormulaScreenState extends State<FormulaScreen> {
     fetchFormulas();
   }
 
-  Future<void> fetchFormulas() async {
+  @override
+  void dispose() {
+    _searchController.dispose(); // Giải phóng bộ nhớ
+    super.dispose();
+  }
+
+  // Thêm tham số forceRefresh để hỗ trợ vuốt xuống tải lại
+  Future<void> fetchFormulas({bool forceRefresh = false}) async {
     if (!mounted) return;
+
+    // Nếu KHÔNG bắt buộc tải mới và dữ liệu lớp này đã có trong Cache -> Dùng luôn
+    if (!forceRefresh && _cachedData.containsKey(_selectedGrade) && _cachedData[_selectedGrade]!.isNotEmpty) {
+      setState(() {
+        allFormulas = _cachedData[_selectedGrade]!;
+        filteredFormulas = allFormulas;
+        isLoading = false;
+        error = '';
+        _searchController.clear();
+      });
+      return;
+    }
+
+    // Nếu chưa có cache hoặc đang forceRefresh, tiến hành gọi API
     setState(() {
       isLoading = true;
       error = '';
-      _searchController.clear(); // Clear search khi đổi lớp
+      if (!forceRefresh) _searchController.clear();
     });
 
     try {
       final data = await FormulaService.getByGrade(_selectedGrade);
       if (mounted) {
         setState(() {
+          _cachedData[_selectedGrade] = data; // Lưu hoặc cập nhật vào cache
           allFormulas = data;
-          filteredFormulas = data;
+
+          // Giữ lại kết quả tìm kiếm nếu đang pull-to-refresh lúc có chữ
+          if (_searchController.text.isNotEmpty) {
+            _filterFormulas(_searchController.text);
+          } else {
+            filteredFormulas = data;
+          }
+
           isLoading = false;
         });
       }
@@ -48,19 +81,26 @@ class _FormulaScreenState extends State<FormulaScreen> {
         setState(() {
           error = 'Không kết nối được với máy chủ Backend';
           isLoading = false;
+          // Xóa danh sách nếu có lỗi để tránh hiển thị sai
+          allFormulas = [];
+          filteredFormulas = [];
         });
       }
     }
   }
 
-  // Hàm xử lý tìm kiếm
+  // Hàm xử lý tìm kiếm (Null-safe)
   void _filterFormulas(String query) {
     setState(() {
-      filteredFormulas = allFormulas
-          .where((f) =>
-      f.title.toLowerCase().contains(query.toLowerCase()) ||
-          f.formula.toLowerCase().contains(query.toLowerCase()))
-          .toList();
+      if (query.trim().isEmpty) {
+        filteredFormulas = allFormulas;
+      } else {
+        filteredFormulas = allFormulas
+            .where((f) =>
+        (f.title.toLowerCase().contains(query.toLowerCase())) ||
+            (f.formula.toLowerCase().contains(query.toLowerCase())))
+            .toList();
+      }
     });
   }
 
@@ -73,7 +113,7 @@ class _FormulaScreenState extends State<FormulaScreen> {
       body: Column(
         children: [
           _buildHeader(),
-          _buildSearchBox(), // Thêm thanh tìm kiếm
+          _buildSearchBox(),
           _buildGradeSelector(),
           Expanded(child: _buildBody()),
         ],
@@ -158,8 +198,11 @@ class _FormulaScreenState extends State<FormulaScreen> {
             padding: const EdgeInsets.only(right: 10),
             child: GestureDetector(
               onTap: () {
-                setState(() => _selectedGrade = grade);
-                fetchFormulas();
+                // Chỉ xử lý nếu chọn tab khác với tab hiện tại
+                if (_selectedGrade != grade) {
+                  setState(() => _selectedGrade = grade);
+                  fetchFormulas();
+                }
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
@@ -192,7 +235,21 @@ class _FormulaScreenState extends State<FormulaScreen> {
     }
 
     if (error.isNotEmpty) {
-      return Center(child: Text(error));
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, color: Colors.red, size: 40),
+            const SizedBox(height: 10),
+            Text(error),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () => fetchFormulas(forceRefresh: true),
+              child: const Text("Thử lại"),
+            )
+          ],
+        ),
+      );
     }
 
     if (filteredFormulas.isEmpty) {
@@ -200,7 +257,8 @@ class _FormulaScreenState extends State<FormulaScreen> {
     }
 
     return RefreshIndicator(
-      onRefresh: fetchFormulas,
+      // Gọi tải lại và ép buộc lấy dữ liệu mới nhất (bỏ qua cache)
+      onRefresh: () => fetchFormulas(forceRefresh: true),
       color: AppColors.primary,
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -235,7 +293,6 @@ class _FormulaScreenState extends State<FormulaScreen> {
             children: [
               Row(
                 children: [
-                  // ĐỔI ICON THÀNH CHỮ Q
                   Container(
                     width: 35,
                     height: 35,

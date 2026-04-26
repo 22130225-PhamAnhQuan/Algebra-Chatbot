@@ -4,6 +4,7 @@ from app.db.database import Base
 
 # IMPORT MODELS (QUAN TRỌNG)
 from app import models
+from app.routers.history_router import router as history_router
 
 # ROUTERS
 from app.routers.auth_router import router as auth_router
@@ -25,6 +26,7 @@ app.include_router(chat_router)
 app.include_router(user_router)
 app.include_router(formula_router)
 app.include_router(solve_router)
+app.include_router(history_router)
 
 @app.get("/")
 def root():

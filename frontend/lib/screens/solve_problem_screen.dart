@@ -1,7 +1,9 @@
-import 'package:algebra_chatbot/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:algebra_chatbot/screens/chat_screen.dart';
 import '../core/theme/app_theme.dart';
+import '../providers/chat_provider.dart';
 
 class SolveProblemScreen extends StatefulWidget {
   const SolveProblemScreen({super.key});
@@ -15,13 +17,18 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
   final TextEditingController _controller = TextEditingController();
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        // Cố định màu AppBar theo Theme
         backgroundColor: AppColors.primary,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Column(
@@ -29,12 +36,10 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
           children: [
             Text(
                 "Nhập bài toán",
-                // Dùng textTheme từ theme và ghi đè màu
                 style: theme.textTheme.titleLarge?.copyWith(color: Colors.white)
             ),
             Text(
                 "Chọn phương thức nhập",
-                // Dùng textTheme cho bodySmall và ghi đè màu
                 style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70)
             ),
           ],
@@ -62,7 +67,6 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
       margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        // Thích ứng màu nền Tab theo Brightness
         color: theme.brightness == Brightness.light
             ? AppColors.surfaceVariant
             : AppColors.inputBackgroundDark,
@@ -91,12 +95,10 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Sử dụng IconTheme để quản lý màu icon
               Icon(icon, color: isSelected ? Colors.white : AppColors.textHint, size: 20),
               const SizedBox(width: 8),
               Text(
                   label,
-                  // Dùng labelLarge và ghi đè màu
                   style: theme.textTheme.labelLarge?.copyWith(
                       color: isSelected ? Colors.white : AppColors.textHint
                   )
@@ -114,7 +116,6 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Card(
-          // Dùng CardTheme định nghĩa trong AppTheme
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -122,17 +123,15 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
               children: [
                 Row(
                   children: [
-                    // --- CẬP NHẬT TỪ ICON SANG CHỮ 'Q' ---
                     CircleAvatar(
-                      // Nền mờ cùng tông primary
                         backgroundColor: AppColors.primary.withOpacity(0.1),
                         radius: 15,
                         child: Text(
                           "Q",
-                          style: GoogleFonts.dmSans( // Dùng font DM Sans cho 'Q'
+                          style: GoogleFonts.dmSans(
                             color: AppColors.primary,
-                            fontWeight: FontWeight.w800, // Đậm hơn để nổi bật
-                            fontSize: 16, // Kích thước chữ 'Q'
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
                           ),
                         )
                     ),
@@ -143,35 +142,21 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
                 const SizedBox(height: 15),
                 TextField(
                   controller: _controller,
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.done,
                   maxLines: 5,
-                  // Tự động áp dụng style từ InputDecorationTheme
                   style: theme.textTheme.bodyLarge,
                   decoration: const InputDecoration(
                     hintText: "Nhập bài toán đại số...",
-                    // Ghi đè border của theme để không có khung
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
-                    fillColor: Colors.transparent, // Nền trong suốt
+                    fillColor: Colors.transparent,
                   ),
                 ),
                 Text("Ví dụ: 2x² + 5x - 3 = 0", style: theme.textTheme.bodySmall),
               ],
             ),
           ),
-        ),
-        const SizedBox(height: 25),
-        // labelSmall từ TextTheme và màu phụ
-        Text("VÍ DỤ NHANH", style: theme.textTheme.labelSmall?.copyWith(color: AppColors.textSecondary)),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: [
-            _exampleChip(theme, "2x² + 5x - 3 = 0"),
-            _exampleChip(theme, "3x + 7 = 22"),
-            _exampleChip(theme, "|2x - 1| = 5"),
-            _exampleChip(theme, "x/2 + x/3 = 5"),
-          ],
         ),
         const SizedBox(height: 25),
         _buildTipBox(theme),
@@ -187,7 +172,6 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
           width: double.infinity,
           height: 220,
           decoration: BoxDecoration(
-            // Cố định màu camera preview hoặc dùng surfaceDark
             color: theme.brightness == Brightness.light ? const Color(0xFF2C254A) : AppColors.surfaceDark,
             borderRadius: BorderRadius.circular(24),
           ),
@@ -220,12 +204,9 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
   // ================= COMMON COMPONENTS =================
   Widget _exampleChip(ThemeData theme, String text) {
     return ActionChip(
-      // Dùng TextStyle nhẹ nhàng cho ActionChip
       label: Text(text, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-      // Sử dụng AppColors trực tiếp để phối màu phụ
       backgroundColor: AppColors.primary.withOpacity(0.05),
       labelStyle: const TextStyle(color: AppColors.primary),
-      // Viền mờ cùng tông primary
       side: BorderSide(color: AppColors.primary.withOpacity(0.1)),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       onPressed: () => _controller.text = text,
@@ -236,7 +217,6 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        // Dùng màu success với opacity thấp cho nền
         color: AppColors.success.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -247,7 +227,6 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
           Expanded(
               child: Text(
                   "Mẹo nhập liệu: Dùng ^ cho lũy thừa (x^2), * cho nhân, sqrt() cho căn bậc 2",
-                  // bodySmall phối với màu success
                   style: theme.textTheme.bodySmall?.copyWith(color: AppColors.success, fontWeight: FontWeight.w500, fontSize: 15)
               )
           ),
@@ -265,7 +244,6 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
           padding: const EdgeInsets.symmetric(vertical: 20),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            // Dùng màu divider từ theme
             border: Border.all(color: theme.dividerColor),
           ),
           child: Column(
@@ -285,14 +263,12 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        // Màu nền phụ tông primary
           color: AppColors.primary.withOpacity(0.05),
           borderRadius: BorderRadius.circular(20)
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // titleSmall phối màu primary
           Text("Hướng dẫn chụp ảnh", style: theme.textTheme.titleSmall?.copyWith(color: AppColors.primary)),
           const SizedBox(height: 12),
           _step(theme, "1", "Chụp rõ nét, đủ ánh sáng"),
@@ -314,44 +290,45 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
               child: Text(num, style: const TextStyle(fontSize: 10, color: Colors.white))
           ),
           const SizedBox(width: 12),
-          // bodyMedium mặc định
           Text(text, style: theme.textTheme.bodyMedium),
         ],
       ),
     );
   }
 
+  // ================= ACTION BUTTON (XỬ LÝ CHUYỂN TRANG) =================
   Widget _buildActionButton(ThemeData theme) {
     return Container(
       padding: const EdgeInsets.all(20),
       child: ElevatedButton(
         style: theme.elevatedButtonTheme.style,
         onPressed: () {
-          // 1. Lấy dữ liệu bài toán
           String problemText = _controller.text.trim();
 
-          // 2. Kiểm tra nếu là Tab Nhập tay mà chưa nhập gì thì báo lỗi
-          if (_tabIndex == 0 && problemText.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Vui lòng nhập bài toán trước khi giải!"),
-                backgroundColor: AppColors.error,
-              ),
-            );
+          if (_tabIndex == 0) { // Tab Nhập tay
+            if (problemText.isEmpty) {
+              _showErrorSnackBar("Vui lòng nhập bài toán trước khi giải!");
+              return;
+            }
+          } else { // Tab Chụp ảnh
+            // CHÚ Ý: Đây là nơi bạn sẽ gọi logic nhận diện ảnh thực tế
+            // Nếu chưa có, hãy tạm thời gán một chuỗi mặc định không rỗng
+            problemText = "Bài toán từ camera: 2x + 5 = 11";
+          }
+
+          // Đảm bảo dữ liệu gửi đi cuối cùng không rỗng
+          if (problemText.isEmpty) {
+            _showErrorSnackBar("Nội dung bài toán không hợp lệ!");
             return;
           }
 
-          // 3. Nếu là Tab Chụp ảnh (Hiện tại Quan làm demo hoặc đã có ảnh)
-          if (_tabIndex == 1) {
-            // Tạm thời gán một ví dụ nếu Quan chưa làm phần nhận diện ảnh thật
-            problemText = "Hình ảnh bài toán từ Camera";
-          }
-
-          // 4. CHUYỂN TRANG
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ChatScreen(problem: problemText),
+              builder: (context) => ChangeNotifierProvider(
+                create: (_) => ChatProvider(),
+                child: ChatScreen(problem: problemText),
+              ),
             ),
           );
         },
@@ -363,6 +340,25 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
             Text(_tabIndex == 0 ? "Giải ngay" : "Nhận diện & Giải"),
           ],
         ),
+      ),
+    );
+  }
+
+  // Hàm hiển thị thông báo lỗi nhanh
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: AppColors.error,
+        behavior: SnackBarBehavior.floating, // Hiển thị dạng nổi cho đẹp
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 3),
       ),
     );
   }

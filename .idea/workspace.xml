@@ -5,38 +5,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6182cbb8-7603-4404-b164-1ab3702e46d6" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/frontend/lib/providers/history_provider.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/lib/providers/navigation_provider.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/lib/services/history_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/models/ai_log.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/ai_log.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/models/conversation.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/conversation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/models/history.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/history.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/models/message.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/message.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/models/problem.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/problem.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/models/refresh_token.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/refresh_token.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/models/solution.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/solution.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/models/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/user.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/routers/chat_router.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/chat_router.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/routers/math_router.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/routers/problem_router.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/problem_router.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/routers/solve_router.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/solve_router.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/schemas/chat.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/chat.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/schemas/problem.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/problem.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/schemas/solve.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/solve.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/services/chat_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/services/chat_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/services/solve_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/services/solve_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/services/solver/ai_solver.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/services/solver/ai_solver.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/history_router.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/history_router.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/services/history_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/services/history_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/models/chat_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/models/chat_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/models/history_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/models/history_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/models/solution_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/models/solution_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/providers/chat_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/providers/chat_provider.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/providers/formula_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/providers/formula_provider.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/screens/chat_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/screens/chat_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/screens/formula_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/screens/formula_detail_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/screens/formula_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/screens/formula_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/screens/history_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/screens/history_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/screens/home_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/screens/home_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/screens/solve_problem_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/screens/solve_problem_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/lib/services/ai_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/ai_service.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/lib/services/auth_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/auth_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/services/image_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/image_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/services/solve_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/solve_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/services/storage_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/storage_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/lib/services/solver_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/solver_service.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/lib/services/user_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/services/user_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/lib/widgets/widgets.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/lib/widgets/widgets.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/linux/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/linux/flutter/generated_plugin_registrant.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/linux/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/linux/flutter/generated_plugins.cmake" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/pubspec.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/windows/flutter/generated_plugins.cmake" afterDir="false" />
     </list>
@@ -63,25 +58,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Flutter.main.dart.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;io.flutter.reload.alreadyRun&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.17&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;PyConsoleConfigurable.Python Console&quot;,
-    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Flutter.main.dart.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "ai__chatbot",
+    "io.flutter.reload.alreadyRun": "true",
+    "kotlin-language-version-configured": "true",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.17",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "PyConsoleConfigurable.Python Console",
+    "show.migrate.to.gradle.popup": "false"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="main.dart" type="FlutterRunConfigurationType" factoryName="Flutter" temporary="true" nameIsGenerated="true">
       <option name="filePath" value="$PROJECT_DIR$/frontend/lib/main.dart" />

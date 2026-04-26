@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_math_fork/flutter_math.dart';
 import '../core/theme/app_theme.dart';
+import '../providers/chat_provider.dart';
+import '../models/chat_model.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String problem; // Nhận đề bài từ màn hình trước truyền sang
+  final String problem;
   const ChatScreen({super.key, required this.problem});
 
   @override
@@ -12,251 +16,271 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _chatController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Khởi tạo giải bài toán ngay khi vào màn hình
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ChatProvider>(context, listen: false).solveProblem(widget.problem);
+    });
+  }
+
+  // Tự động cuộn xuống khi có tin nhắn mới
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _chatController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FE),
       appBar: _buildAppBar(context),
       body: Column(
         children: [
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                _buildUserQuestion(widget.problem),
-                const SizedBox(height: 20),
-                _buildBotResponse(),
-              ],
+            child: Consumer<ChatProvider>(
+              builder: (context, provider, child) {
+                // Cuộn xuống khi danh sách thay đổi
+                WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+
+                return ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: provider.messages.length + (provider.isSending ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    // Hiển thị trạng thái AI đang gõ
+                    if (index == provider.messages.length) {
+                      return _buildLoadingState();
+                    }
+
+                    final msg = provider.messages[index];
+                    if (msg.sender == 'USER') {
+                      return _buildUserBubble(msg.content);
+                    } else {
+                      // Tin nhắn đầu tiên của Bot (index 1) thường là lời giải chi tiết
+                      // Bạn có thể tùy biến logic này dựa trên flow của mình
+                      bool isSolution = (index == 1 && provider.solutionData != null);
+                      return _buildBotBubble(msg.content, isSolution: isSolution);
+                    }
+                  },
+                );
+              },
             ),
           ),
-          _buildChatInput(theme),
+          _buildChatInput(),
         ],
       ),
     );
   }
 
-  // ================= APPBAR =================
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.white,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black54),
-        onPressed: () => Navigator.pop(context),
-      ),
-      title: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: AppColors.primary,
-            radius: 18,
-            child: const Icon(Icons.auto_awesome, color: Colors.white, size: 18),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Algebra AI", style: GoogleFonts.dmSans(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
-              Row(
-                children: [
-                  Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
-                  const SizedBox(width: 4),
-                  const Text("Đang hoạt động", style: TextStyle(fontSize: 11, color: Colors.grey)),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-      actions: [
-        IconButton(icon: const Icon(Icons.more_vert, color: Colors.black54), onPressed: () {}),
-      ],
-    );
-  }
-
-  // ================= USER QUESTION BUBBLE =================
-  Widget _buildUserQuestion(String text) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF3E9FF),
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: AppColors.primary.withOpacity(0.1)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text("Σ", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
-            const SizedBox(width: 10),
-            Text(text, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
-            const SizedBox(width: 10),
-            const Icon(Icons.copy_rounded, size: 14, color: AppColors.primary),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ================= BOT RESPONSE =================
-  Widget _buildBotResponse() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Lời dẫn của Bot
-        Container(
-          margin: const EdgeInsets.only(left: 45),
-          padding: const EdgeInsets.all(16),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(20)),
-          ),
-          child: const Text("nhé! Đây là lời giải chi tiết từng bước:"),
-        ),
-        const SizedBox(height: 12),
-
-        // Khung lời giải chi tiết
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              backgroundColor: AppColors.primary,
-              radius: 16,
-              child: const Icon(Icons.auto_awesome, color: Colors.white, size: 14),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey.withOpacity(0.1)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.auto_awesome, color: AppColors.primary, size: 16),
-                        SizedBox(width: 8),
-                        Text("Giải từng bước", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    _buildStep("1", "Xác định hệ số: a = 2, b = 5, c = -3"),
-                    _buildStep("2", "Tính delta: Δ = b² - 4ac = 5² - 4×2×(-3) = 25 + 24 = 49"),
-                    _buildStep("3", "Vì Δ = 49 > 0 → Phương trình có 2 nghiệm phân biệt"),
-                    _buildStep("4", "x₁ = (-b + √Δ) / 2a = (-5 + 7) / 4 = 2/4 = 1/2"),
-                    _buildStep("5", "x₂ = (-b - √Δ) / 2a = (-5 - 7) / 4 = -12/4 = -3"),
-                    _buildStep("6", "✅ Kết quả: x₁ = 1/2 và x₂ = -3"),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-
-        // Action buttons dưới câu trả lời
-        Padding(
-          padding: const EdgeInsets.only(left: 45, top: 10),
-          child: Row(
-            children: [
-              _botAction(Icons.thumb_up_alt_outlined, "Hữu ích"),
-              _botAction(Icons.thumb_down_alt_outlined, "Không đúng"),
-              _botAction(Icons.copy, "Sao chép"),
-            ],
-          ),
-        ),
-
-        // Câu hỏi gợi ý
-        const Padding(
-          padding: EdgeInsets.only(left: 45, top: 20),
-          child: Center(child: Text("Câu hỏi gợi ý", style: TextStyle(color: Colors.grey, fontSize: 12))),
-        ),
-        _buildSuggestBtn("Giải thích cách tính delta?"),
-        _buildSuggestBtn("Cho ví dụ tương tự"),
-        _buildSuggestBtn("Phương trình có nghiệm kép là gì?"),
-      ],
-    );
-  }
-
-  Widget _buildStep(String num, String content) {
+  // ================= BONG BÓNG NGƯỜI DÙNG =================
+  Widget _buildUserBubble(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 15),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF3E9FF),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(15),
+              bottomLeft: Radius.circular(15),
+              bottomRight: Radius.circular(15),
+            ),
+            border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+          ),
+          child: Text(
+            text,
+            style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ================= BONG BÓNG AI =================
+  Widget _buildBotBubble(String content, {bool isSolution = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(radius: 10, backgroundColor: AppColors.primary, child: Text(num, style: const TextStyle(fontSize: 10, color: Colors.white))),
+          const CircleAvatar(
+            backgroundColor: AppColors.primary,
+            radius: 16,
+            child: Icon(Icons.auto_awesome, color: Colors.white, size: 14),
+          ),
           const SizedBox(width: 10),
-          Expanded(child: Text(content, style: const TextStyle(fontSize: 13, height: 1.5))),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(20),
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))
+                ],
+              ),
+              child: isSolution ? _buildSolutionContent() : _buildSimpleText(content),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _botAction(IconData icon, String label) {
+  // Nội dung chat bình thường (hỗ trợ LaTeX)
+  Widget _buildSimpleText(String text) {
+    return Math.tex(
+      text,
+      textStyle: const TextStyle(fontSize: 15, color: Colors.black87, height: 1.4),
+      onErrorFallback: (err) => Text(text),
+    );
+  }
+
+  // Nội dung lời giải chi tiết (Dùng Model Solution của bạn)
+  Widget _buildSolutionContent() {
+    final provider = Provider.of<ChatProvider>(context, listen: false);
+    final data = provider.solutionData;
+    if (data == null) return const Text("Đang tải lời giải...");
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(bottom: 10),
+          child: Text("Xong rồi! Đây là lời giải của bạn:"),
+        ),
+        const Divider(),
+        const SizedBox(height: 10),
+        if (data.steps.isNotEmpty)
+          for (int i = 0; i < data.steps.length; i++)
+            _buildStepRow((i + 1).toString(), data.steps[i]),
+        const SizedBox(height: 10),
+        if (data.latex.isNotEmpty)
+          Center(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Math.tex(data.latex, textStyle: const TextStyle(fontSize: 18)),
+            ),
+          ),
+        const SizedBox(height: 15),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.success.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text("Đáp án: ${data.result}", style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.success)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStepRow(String num, String content) {
     return Padding(
-      padding: const EdgeInsets.only(right: 15),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 14, color: Colors.grey),
-          const SizedBox(width: 4),
-          Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+          CircleAvatar(radius: 9, backgroundColor: AppColors.primary, child: Text(num, style: const TextStyle(fontSize: 9, color: Colors.white))),
+          const SizedBox(width: 8),
+          Expanded(child: Text(content, style: const TextStyle(fontSize: 14))),
         ],
       ),
     );
   }
 
-  Widget _buildSuggestBtn(String text) {
+  // ================= THANH NHẬP LIỆU =================
+  Widget _buildChatInput() {
     return Container(
-      margin: const EdgeInsets.only(left: 45, top: 10),
-      width: double.infinity,
-      child: OutlinedButton(
-        onPressed: () {},
-        style: OutlinedButton.styleFrom(
-          backgroundColor: Colors.white,
-          side: BorderSide(color: Colors.grey.withOpacity(0.1)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.auto_awesome, size: 14, color: AppColors.primary),
-            const SizedBox(width: 10),
-            Text(text, style: const TextStyle(color: Colors.black87, fontSize: 13)),
-          ],
-        ),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 35),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-    );
-  }
-
-  // ================= INPUT FIELD =================
-  Widget _buildChatInput(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 30),
-      color: Colors.white,
       child: Row(
         children: [
           Expanded(
             child: TextField(
               controller: _chatController,
               decoration: InputDecoration(
-                hintText: "Hỏi thêm về bài toán...",
+                hintText: "Bạn chưa hiểu chỗ nào?",
                 fillColor: const Color(0xFFF8F9FE),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                filled: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(25), borderSide: BorderSide.none),
               ),
             ),
           ),
           const SizedBox(width: 10),
-          CircleAvatar(
-            backgroundColor: const Color(0xFFCAB1FF),
-            radius: 25,
-            child: const Icon(Icons.send_rounded, color: Colors.white),
+          GestureDetector(
+            onTap: _handleSendMessage,
+            child: const CircleAvatar(
+              backgroundColor: Color(0xFFCAB1FF),
+              radius: 24,
+              child: Icon(Icons.send_rounded, color: Colors.white, size: 20),
+            ),
           ),
+        ],
+      ),
+    );
+  }
+
+  void _handleSendMessage() {
+    final text = _chatController.text.trim();
+    if (text.isNotEmpty) {
+      Provider.of<ChatProvider>(context, listen: false).sendUserMessage(text);
+      _chatController.clear();
+      FocusScope.of(context).unfocus();
+    }
+  }
+
+  // ================= APPBAR & LOADING =================
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.black87), onPressed: () => Navigator.pop(context)),
+      title: Row(
+        children: [
+          const CircleAvatar(backgroundColor: AppColors.primary, radius: 16, child: Icon(Icons.auto_awesome, color: Colors.white, size: 16)),
+          const SizedBox(width: 10),
+          Text("Gia sư AI", style: GoogleFonts.dmSans(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 18)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 45),
+      child: Row(
+        children: [
+          SizedBox(height: 15, width: 15, child: CircularProgressIndicator(strokeWidth: 2)),
+          SizedBox(width: 10),
+          Text("AI đang trả lời...", style: TextStyle(fontSize: 12, color: Colors.grey, fontStyle: FontStyle.italic)),
         ],
       ),
     );
