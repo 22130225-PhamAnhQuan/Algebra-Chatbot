@@ -7,10 +7,6 @@ from app.models.solution import Solution
 class HistoryService:
     @staticmethod
     def get_my_history(db: Session, user_id: int):
-        """
-        Lấy lịch sử giải bài của Quan.
-        Kết hợp (Join) 3 bảng để lấy đủ nội dung đề và giải.
-        """
         results = db.query(
             History.id,
             History.created_at,
@@ -25,18 +21,25 @@ class HistoryService:
             .order_by(History.created_at.desc()) \
             .all()
 
-        return results
+        # Chuyển đổi từ Row object sang list of dict để khớp với Pydantic
+        return [dict(r._mapping) for r in results]
 
     @staticmethod
     def delete_history_item(db: Session, history_id: int, user_id: int):
-        """Xóa 1 dòng lịch sử nhưng giữ lại dữ liệu gốc nếu cần"""
+        """Xóa một bản ghi lịch sử của người dùng cụ thể"""
+        # Tìm đúng bản ghi thuộc về user đó để tránh xóa nhầm của người khác
         item = db.query(History).filter(
             History.id == history_id,
             History.user_id == user_id
         ).first()
 
         if item:
-            db.delete(item)
-            db.commit()
-            return True
+            try:
+                db.delete(item)
+                db.commit()
+                return True
+            except Exception as e:
+                db.rollback()
+                print(f"Lỗi khi xóa DB: {e}")
+                return False
         return False

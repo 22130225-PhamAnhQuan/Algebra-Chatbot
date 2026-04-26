@@ -1,35 +1,34 @@
-class ProblemModel {
-  final int id;
-  final String content;
-  final String inputType; // 'text', 'image'
-  final DateTime createdAt;
-
-  ProblemModel({required this.id, required this.content, required this.inputType, required this.createdAt});
-
-  factory ProblemModel.fromJson(Map<String, dynamic> json) => ProblemModel(
-    id: json['id'],
-    content: json['content'],
-    inputType: json['input_type'],
-    createdAt: DateTime.parse(json['created_at']),
-  );
-}
-
+// lib/models/solution_model.dart
 class SolutionModel {
-  final int id;
-  final int problemId;
-  final String? result;
-  final String? steps;
-  final String? latex;
-  final String? model;
+  final String result;
+  final List<String> steps;
+  final String latex;
 
-  SolutionModel({required this.id, required this.problemId, this.result, this.steps, this.latex, this.model});
+  SolutionModel({
+    required this.result,
+    required this.steps,
+    required this.latex,
+  });
 
-  factory SolutionModel.fromJson(Map<String, dynamic> json) => SolutionModel(
-    id: json['id'],
-    problemId: json['problem_id'],
-    result: json['result'],
-    steps: json['steps'],
-    latex: json['latex'],
-    model: json['model'],
-  );
+  factory SolutionModel.fromJson(Map<String, dynamic> json) {
+    // API của bạn trả về data bọc ngoài (thấy từ Swagger)
+    var data = json['data'] ?? json; // Dự phòng nếu sau này backend bỏ bọc 'data'
+
+    // Xử lý an toàn mảng steps
+    var rawSteps = data['steps'] ?? [];
+    List<String> parsedSteps = [];
+
+    if (rawSteps is List) {
+      parsedSteps = rawSteps.map((s) => s.toString()).toList();
+    } else if (rawSteps is String) {
+      // Xử lý trường hợp backend trả về chuỗi nối bằng dấu |
+      parsedSteps = rawSteps.split('|').where((s) => s.isNotEmpty).toList();
+    }
+
+    return SolutionModel(
+      result: data['result']?.toString() ?? "",
+      steps: parsedSteps,
+      latex: data['latex']?.toString() ?? "",
+    );
+  }
 }
