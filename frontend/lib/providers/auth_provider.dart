@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
+import '../services/user_service.dart';
 
 class AuthProvider with ChangeNotifier {
   UserModel? _user;
@@ -18,7 +20,7 @@ class AuthProvider with ChangeNotifier {
       _isLoading = true;
 
       // Gọi API lấy profile
-      final userData = await ApiService.getUserProfile();
+      final userData = await UserService.getUserProfile();
 
       if (userData != null) {
         _user = userData;
@@ -38,7 +40,7 @@ class AuthProvider with ChangeNotifier {
     try {
       _isLoading = true;
 
-      await ApiService.updateProfile(name: name, email: email);
+      await UserService.updateProfile(name: name, email: email);
       await loadUser(); // Tải lại thông tin mới
       print("AuthProvider đã nhận user: ${_user?.name}");
       return true;
@@ -57,7 +59,7 @@ class AuthProvider with ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      await ApiService.changePassword(oldPassword: oldPassword, newPassword: newPassword);
+      await UserService.changePassword(oldPassword: oldPassword, newPassword: newPassword);
       return true;
     } catch (e) {
       _error = e.toString();
@@ -72,7 +74,7 @@ class AuthProvider with ChangeNotifier {
   // 4. Đăng xuất
   Future<void> logout() async {
     try {
-      await ApiService.logout(); // Gọi backend xóa Refresh Token (nếu có)
+      await UserService.logout(); // Gọi backend xóa Refresh Token (nếu có)
     } catch (e) {
       debugPrint("Lỗi logout backend: $e");
     }

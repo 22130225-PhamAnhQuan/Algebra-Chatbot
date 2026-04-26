@@ -63,4 +63,23 @@ class UserService {
       throw data['detail'] ?? 'Lỗi đổi mật khẩu';
     }
   }
+
+  // LOGOUT
+  static Future<void> logout() async {
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/users/logout'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        debugPrint("Backend đã thu hồi phiên đăng nhập thành công.");
+      }
+    } catch (e) {
+      debugPrint("Lỗi gọi API logout: $e");
+    } finally {
+      // Dù API có lỗi hay không, bắt buộc phải xóa token ở Local
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('token');
+    }
+  }
 }

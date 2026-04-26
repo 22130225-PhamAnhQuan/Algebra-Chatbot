@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/theme/app_theme.dart';
-import '../services/api_service.dart';
+import '../services/auth_service.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -66,14 +66,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
 
       setState(() => _loading = true);
 
-      if (_step == 0) await ApiService.forgotPassword(_emailCtrl.text.trim());
+      if (_step == 0) await AuthService.forgotPassword(_emailCtrl.text.trim());
       if (_step == 1) {
         final otp = _otpCtrls.map((e) => e.text).join();
-        await ApiService.verifyOtp(email: _emailCtrl.text.trim(), otp: otp);
+        await AuthService.verifyOtp(email: _emailCtrl.text.trim(), otp: otp);
       }
       if (_step == 2) {
         final otp = _otpCtrls.map((e) => e.text).join();
-        await ApiService.resetPassword(email: _emailCtrl.text.trim(), otp: otp, newPassword: _newPassCtrl.text);
+        await AuthService.resetPassword(email: _emailCtrl.text.trim(), otp: otp, newPassword: _newPassCtrl.text);
       }
 
       if (!mounted) return;
@@ -210,7 +210,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         const SizedBox(height: 16),
         Center(
           child: _canResend
-              ? TextButton(onPressed: () async { await ApiService.forgotPassword(_emailCtrl.text); _startTimer(); }, child: const Text('Gửi lại mã'))
+              ? TextButton(onPressed: () async { await AuthService.forgotPassword(_emailCtrl.text); _startTimer(); }, child: const Text('Gửi lại mã'))
               : Text('Gửi lại sau $_resendTimer giây', style: GoogleFonts.dmSans(fontSize: 13, color: colorScheme.onSurface.withOpacity(0.4))),
         ),
         const SizedBox(height: 24),

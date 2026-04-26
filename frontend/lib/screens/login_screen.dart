@@ -5,14 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
 import '../core/theme/app_theme.dart';
 import '../widgets/widgets.dart';
-import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import 'forgotpw_screen.dart';
 import 'profile_screen.dart';
 import 'register_screen.dart';
-import 'home_screen.dart'; // Đảm bảo import HomeScreen nếu bạn muốn vào đó
+import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -60,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
       setState(() => _loading = true);
 
-      final token = await ApiService.login(
+      final token = await AuthService.login(
         email: _emailCtrl.text.trim(),
         password: _passCtrl.text,
       );
@@ -127,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       final String? idToken = auth.idToken;
       if (idToken == null) throw 'Không lấy được Token từ Google';
 
-      final accessToken = await ApiService.loginWithGoogle(idToken);
+      final accessToken = await AuthService.loginWithGoogle(idToken);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', accessToken);
 

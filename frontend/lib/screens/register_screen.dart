@@ -7,7 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme/app_theme.dart';
 import 'chat_screen.dart';
-import '../services/api_service.dart';
+import '../services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -70,7 +70,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     if (!_validate()) return;
     setState(() => _loading = true);
     try {
-      final token = await ApiService.register(
+      final token = await AuthService.register(
         name: _nameCtrl.text.trim(),
         email: _emailCtrl.text.trim(),
         password: _passCtrl.text,
@@ -96,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       final GoogleSignInAuthentication auth = await account.authentication;
       final String? idToken = auth.idToken;
       if (idToken == null) throw 'Không lấy được Token từ Google';
-      final accessToken = await ApiService.loginWithGoogle(idToken);
+      final accessToken = await AuthService.loginWithGoogle(idToken);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', accessToken);
       if (!mounted) return;

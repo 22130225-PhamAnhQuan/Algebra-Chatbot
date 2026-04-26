@@ -140,22 +140,4 @@ class AuthService {
     }
   }
 
-  // LOGOUT (Đăng xuất)
-  static Future<void> logout() async {
-    try {
-      final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/auth/logout'),
-        headers: await _getHeaders(),
-      );
-      if (response.statusCode == 200) {
-        debugPrint("Backend đã thu hồi phiên đăng nhập thành công.");
-      }
-    } catch (e) {
-      debugPrint("Lỗi gọi API logout: $e");
-    } finally {
-      // Dù API có lỗi hay không, bắt buộc phải xóa token ở Local
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('token');
-    }
-  }
 }
