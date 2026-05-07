@@ -6,24 +6,41 @@ import '../services/solver_service.dart';
 import '../services/ai_service.dart';
 
 class ChatProvider extends ChangeNotifier {
-  // Danh sách các tin nhắn hiển thị trên màn hình
   List<ChatMessage> messages = [];
-
-  // Dữ liệu lời giải chi tiết (Dùng cho tin nhắn đầu tiên)
   SolutionModel? solutionData;
-
-  bool isLoading = false; // Trạng thái khi giải bài đầu tiên
-  bool isSending = false; // Trạng thái khi đang chat thêm với AI
+  bool isLoading = false;
+  bool isSending = false;
   String errorMessage = "";
-  int? currentConversationId;
 
-  // --- HÀM 1: GIẢI BÀI TOÁN ĐẦU TIÊN (Fix lỗi solveProblem) ---
+  // --- HÀM MỚI: Nhận kết quả có sẵn từ màn hình trước ---
+  void setInitialSolution(String problemText, SolutionModel solution) {
+    messages.clear();
+    solutionData = solution;
+
+    // Thêm câu hỏi của User
+    messages.add(ChatMessage(
+      sender: 'USER',
+      content: problemText,
+      type: 'text',
+      createdAt: DateTime.now(),
+    ));
+
+    // Thêm phản hồi của Bot
+    messages.add(ChatMessage(
+      sender: 'BOT',
+      content: "Xong rồi! Đây là lời giải chi tiết cho bạn:",
+      type: 'text',
+      createdAt: DateTime.now(),
+    ));
+
+    notifyListeners();
+  }
+
+  // --- GIẢI BÀI (Dùng khi không có dữ liệu sẵn) ---
   Future<void> solveProblem(String problemText) async {
-    if (problemText.trim().isEmpty) return; // Chặn gửi text rỗng [cite: 128]
+    if (problemText.trim().isEmpty) return;
 
     isLoading = true;
-    errorMessage = "";
-    solutionData = null;
     messages.clear();
     notifyListeners();
 
@@ -31,58 +48,31 @@ class ChatProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? "";
 
-      // 1. User Message
-      messages.add(ChatMessage(
-        sender: 'USER',
-        content: problemText,
-        type: 'text',
-        createdAt: DateTime.now(),
-      ));
+      messages.add(ChatMessage(sender: 'USER', content: problemText, type: 'text', createdAt: DateTime.now()));
       notifyListeners();
 
-      // 2. Call API [cite: 70, 120]
-      final result = await SolverService.solveProblem(
-        problemText: problemText,
-        token: token,
-      );
-
+      final result = await SolverService.solveProblem(problemText: problemText, token: token);
       solutionData = result;
 
-      // 3. Bot Message thành công [cite: 71, 73]
       messages.add(ChatMessage(
         sender: 'BOT',
         content: "Xong rồi! Đây là lời giải chi tiết cho bạn:",
         type: 'text',
         createdAt: DateTime.now(),
       ));
-
     } catch (e) {
-      // Xử lý khi Backend trả về lỗi 500 hoặc mất kết nối AI [cite: 124]
-      errorMessage = e.toString();
-      messages.add(ChatMessage(
-        sender: 'BOT',
-        content: "⚠️ Lỗi: $errorMessage. Bạn hãy kiểm tra lại kết nối AI (Ollama) nhé!",
-        type: 'text',
-        createdAt: DateTime.now(),
-      ));
+      messages.add(ChatMessage(sender: 'BOT', content: "Lỗi: $e", type: 'text', createdAt: DateTime.now()));
     } finally {
       isLoading = false;
       notifyListeners();
     }
   }
 
-  // --- HÀM 2: GỬI TIN NHẮN CHAT TIẾP THEO ---
+  // --- CHAT TIẾP THEO ---
   Future<void> sendUserMessage(String content) async {
     if (content.trim().isEmpty) return;
 
-    final userMsg = ChatMessage(
-      sender: 'USER',
-      content: content,
-      type: 'text',
-      createdAt: DateTime.now(),
-    );
-
-    messages.add(userMsg);
+    messages.add(ChatMessage(sender: 'USER', content: content, type: 'text', createdAt: DateTime.now()));
     isSending = true;
     notifyListeners();
 
@@ -90,16 +80,15 @@ class ChatProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? "";
 
-      // Gọi API Chat (Phần này kết nối với Backend Phi-3)
       final botMsg = await ChatApiService.sendMessage(
-        conversationId: currentConversationId ?? 0,
+        conversationId: 0, // Tạm thời để 0 hoặc ID thực tế
         content: content,
         token: token,
       );
 
       messages.add(botMsg);
     } catch (e) {
-      debugPrint("Lỗi gửi tin nhắn: $e");
+      debugPrint("Lỗi: $e");
     } finally {
       isSending = false;
       notifyListeners();

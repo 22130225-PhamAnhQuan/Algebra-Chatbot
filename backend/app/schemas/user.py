@@ -3,7 +3,6 @@ from pydantic import BaseModel, EmailStr
 
 class UpdateProfileRequest(BaseModel):
     name: str
-    email: EmailStr
 
 class ChangePasswordRequest(BaseModel):
     old_password: str

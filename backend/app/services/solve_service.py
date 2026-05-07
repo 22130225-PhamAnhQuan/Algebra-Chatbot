@@ -17,55 +17,64 @@ class SolveService:
         input_type = "text"
         raw_text = text
 
-        # 1. Xử lý OCR nếu có ảnh [cite: 11, 16, 23]
+        # 1. Xử lý OCR nếu người dùng gửi ảnh
         if image_bytes:
             input_type = "image"
+            # Sử dụng EasyOCR đã nâng cấp
             raw_text = await OcrService.extract_text_from_image(image_bytes)
 
-        # 2. Giải toán qua AI Pipeline [cite: 10, 15, 36]
+        # 2. Giải toán qua AI Pipeline (Trả về JSON có grade, steps, result, latex)
         solution_data = await AISolver.solve(raw_text)
         latency = int((time.time() - start_time) * 1000)
 
-        # 3. Lưu vào Database (PostgreSQL) [cite: 18, 29, 37]
-        # Lưu Problem
-        new_problem = Problem(user_id=user_id, content=raw_text, input_type=input_type)
+        # 3. Lưu vào Database (PostgreSQL)
+        # Lưu Problem: Thêm thông tin khối lớp vào content nếu muốn (tùy chọn)
+        grade = solution_data.get('grade', 'Chưa xác định')
+        new_problem = Problem(
+            user_id=user_id,
+            content=raw_text,
+            input_type=input_type
+        )
         db.add(new_problem)
-        db.flush()  # Để lấy ID
+        db.flush()
 
+        # Chuẩn hóa steps (giữ logic ép kiểu chuỗi an toàn của bạn)
         raw_steps = solution_data.get('steps', [])
-
-        # 2. Ép kiểu từng phần tử về chuỗi (đề phòng AI trả về dict)
         formatted_steps = []
         for step in raw_steps:
             if isinstance(step, str):
                 formatted_steps.append(step)
             elif isinstance(step, dict):
-                # Nếu là dict, lấy giá trị đầu tiên của nó
                 val = list(step.values())[0] if step.values() else ""
                 formatted_steps.append(str(val))
             else:
                 formatted_steps.append(str(step))
 
-        # 3. Lưu Solution với danh sách đã chuẩn hóa
+        # 4. Lưu Solution
+        # Mình bổ sung thêm thông tin Grade vào phần model để sau này dễ thống kê
         new_solution = Solution(
             problem_id=new_problem.id,
             result=str(solution_data.get('result', '')),
-            steps="|".join(formatted_steps),  # Nối các chuỗi an toàn bằng dấu |
+            steps="|".join(formatted_steps),
             latex=solution_data.get('latex', ''),
-            model="phi3-mini + sympy"
+            model=f"phi3-mini (Lớp {grade}) + sympy"  # Lưu vết lớp mấy
         )
-        # ---------------------------------------
 
         db.add(new_solution)
         db.flush()
 
-        # Lưu History & Log
+        # 5. Lưu History & Log
         db.add(History(user_id=user_id, problem_id=new_problem.id, solution_id=new_solution.id))
         db.add(AILog(
-            user_id=user_id, problem_id=new_problem.id,
-            input=raw_text, output=str(solution_data.get('result', '')),
-            latency_ms=latency, status="success"
+            user_id=user_id,
+            problem_id=new_problem.id,
+            input=raw_text,
+            output=str(solution_data.get('result', '')),
+            latency_ms=latency,
+            status="success"
         ))
 
         db.commit()
+
+        # Trả về đầy đủ dữ liệu cho Frontend (bao gồm cả grade để Flutter hiển thị)
         return solution_data

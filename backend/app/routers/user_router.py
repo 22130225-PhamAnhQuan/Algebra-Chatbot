@@ -24,7 +24,6 @@ def update_profile(
     user = Depends(get_current_user)
 ):
     user.name = req.name
-    user.email = req.email
 
     db.commit()
     db.refresh(user)
@@ -33,7 +32,6 @@ def update_profile(
         "message": "Updated successfully",
         "user": {
             "id": user.id,
-            "email": user.email,
             "name": user.name
         }
     }

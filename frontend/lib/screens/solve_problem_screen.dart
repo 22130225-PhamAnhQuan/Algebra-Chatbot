@@ -1,9 +1,14 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+// Import các thành phần của dự án Quan
+import 'package:algebra_chatbot/providers/solver_provider.dart';
+import 'package:algebra_chatbot/providers/auth_provider.dart';
 import 'package:algebra_chatbot/screens/chat_screen.dart';
 import '../core/theme/app_theme.dart';
-import '../providers/chat_provider.dart';
 
 class SolveProblemScreen extends StatefulWidget {
   const SolveProblemScreen({super.key});
@@ -14,7 +19,9 @@ class SolveProblemScreen extends StatefulWidget {
 
 class _SolveProblemScreenState extends State<SolveProblemScreen> {
   int _tabIndex = 0; // 0: Nhập tay, 1: Chụp ảnh
+  File? _selectedImage;
   final TextEditingController _controller = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void dispose() {
@@ -25,34 +32,33 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: AppColors.primary,
+        elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-                "Nhập bài toán",
-                style: theme.textTheme.titleLarge?.copyWith(color: Colors.white)
-            ),
-            Text(
-                "Chọn phương thức nhập",
-                style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70)
-            ),
+            Text("Nhập bài toán",
+                style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+            Text("Chọn phương thức nhập",
+                style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70)),
           ],
         ),
       ),
       body: Column(
         children: [
-          _buildTabSelector(theme),
+          _buildTabSelector(isDark),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              // Hiển thị nội dung tương ứng với Tab
-              child: _tabIndex == 0 ? _buildManualInput(theme) : _buildCameraInput(theme),
+              child: _tabIndex == 0
+                  ? _buildManualInput(theme, isDark)
+                  : _buildCameraInput(isDark),
             ),
           ),
           _buildActionButton(theme),
@@ -61,31 +67,32 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
     );
   }
 
-  // ================= TAB SELECTOR =================
-  Widget _buildTabSelector(ThemeData theme) {
+  // ================= 1. TAB SELECTOR =================
+  Widget _buildTabSelector(bool isDark) {
     return Container(
       margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.light
-            ? AppColors.surfaceVariant
-            : AppColors.inputBackgroundDark,
+        color: isDark ? AppColors.inputBackgroundDark : AppColors.surfaceVariant,
         borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
         children: [
-          _tabItem(theme, 0, Icons.keyboard_alt_outlined, "Nhập tay"),
-          _tabItem(theme, 1, Icons.camera_alt_outlined, "Chụp ảnh"),
+          _tabItem(0, Icons.keyboard_alt_outlined, "Nhập tay"),
+          _tabItem(1, Icons.camera_alt_outlined, "Chụp ảnh"),
         ],
       ),
     );
   }
 
-  Widget _tabItem(ThemeData theme, int index, IconData icon, String label) {
+  Widget _tabItem(int index, IconData icon, String label) {
     bool isSelected = _tabIndex == index;
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() => _tabIndex = index),
+        onTap: () => setState(() {
+          _tabIndex = index;
+          FocusScope.of(context).unfocus(); // Ẩn bàn phím khi chuyển tab
+        }),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
@@ -97,12 +104,11 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
             children: [
               Icon(icon, color: isSelected ? Colors.white : AppColors.textHint, size: 20),
               const SizedBox(width: 8),
-              Text(
-                  label,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                      color: isSelected ? Colors.white : AppColors.textHint
-                  )
-              ),
+              Text(label,
+                  style: TextStyle(
+                      color: isSelected ? Colors.white : AppColors.textHint,
+                      fontWeight: FontWeight.bold
+                  )),
             ],
           ),
         ),
@@ -110,12 +116,14 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
     );
   }
 
-  // ================= INTERFACE 1: NHẬP TAY =================
-  Widget _buildManualInput(ThemeData theme) {
+  // ================= 2. NHẬP TAY (Manual) =================
+  Widget _buildManualInput(ThemeData theme, bool isDark) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceVariant.withOpacity(0.5),
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -124,16 +132,9 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
                 Row(
                   children: [
                     CircleAvatar(
-                        backgroundColor: AppColors.primary.withOpacity(0.1),
-                        radius: 15,
-                        child: Text(
-                          "Q",
-                          style: GoogleFonts.dmSans(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16,
-                          ),
-                        )
+                      backgroundColor: AppColors.primary.withOpacity(0.1),
+                      radius: 15,
+                      child: const Text("Q", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(width: 10),
                     Text("Bài toán đại số", style: theme.textTheme.titleMedium),
@@ -142,40 +143,42 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
                 const SizedBox(height: 15),
                 TextField(
                   controller: _controller,
-                  keyboardType: TextInputType.text,
-                  textInputAction: TextInputAction.done,
-                  maxLines: 5,
+                  maxLines: 6,
                   style: theme.textTheme.bodyLarge,
                   decoration: const InputDecoration(
-                    hintText: "Nhập bài toán đại số...",
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    fillColor: Colors.transparent,
+                    hintText: "Nhập bài toán của bạn...",
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(color: AppColors.textHint),
                   ),
                 ),
-                Text("Ví dụ: 2x² + 5x - 3 = 0", style: theme.textTheme.bodySmall),
+                const Divider(),
+                Text("Ví dụ: 2x^2 + 5x - 3 = 0",
+                    style: theme.textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic)),
               ],
             ),
           ),
         ),
-        const SizedBox(height: 25),
-        _buildTipBox(theme),
+        const SizedBox(height: 20),
+        _buildInfoBox(AppColors.success, Icons.lightbulb_outline, "Mẹo: Dùng ^ cho lũy thừa (x^2), * cho nhân, sqrt() cho căn bậc 2."),
       ],
     );
   }
 
-  // ================= INTERFACE 2: CHỤP ẢNH =================
-  Widget _buildCameraInput(ThemeData theme) {
+  // ================= 3. CHỤP ẢNH (Camera) =================
+  Widget _buildCameraInput(bool isDark) {
     return Column(
       children: [
         Container(
           width: double.infinity,
-          height: 220,
+          height: 250,
           decoration: BoxDecoration(
-            color: theme.brightness == Brightness.light ? const Color(0xFF2C254A) : AppColors.surfaceDark,
+            color: const Color(0xFF2C254A), // Tím than đồng bộ ảnh mẫu Quan gửi
             borderRadius: BorderRadius.circular(24),
+            image: _selectedImage != null
+                ? DecorationImage(image: FileImage(_selectedImage!), fit: BoxFit.cover)
+                : null,
           ),
-          child: const Center(
+          child: _selectedImage == null ? const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -185,72 +188,42 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
                 Text("Hướng camera vào bài toán", style: TextStyle(color: Colors.white60, fontSize: 12)),
               ],
             ),
-          ),
+          ) : null,
         ),
         const SizedBox(height: 20),
         Row(
           children: [
-            _cameraButton(theme, Icons.camera_alt_outlined, "Chụp ảnh"),
+            _cameraActionBtn("Chụp ảnh", Icons.camera_alt, true, ImageSource.camera),
             const SizedBox(width: 15),
-            _cameraButton(theme, Icons.image_outlined, "Thư viện"),
+            _cameraActionBtn("Thư viện", Icons.image, false, ImageSource.gallery),
           ],
         ),
         const SizedBox(height: 25),
-        _buildInstructionBox(theme),
+        _buildGuideBox(),
       ],
     );
   }
 
-  // ================= COMMON COMPONENTS =================
-  Widget _exampleChip(ThemeData theme, String text) {
-    return ActionChip(
-      label: Text(text, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-      backgroundColor: AppColors.primary.withOpacity(0.05),
-      labelStyle: const TextStyle(color: AppColors.primary),
-      side: BorderSide(color: AppColors.primary.withOpacity(0.1)),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      onPressed: () => _controller.text = text,
-    );
-  }
-
-  Widget _buildTipBox(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.auto_awesome_rounded, color: AppColors.success, size: 20),
-          const SizedBox(width: 13),
-          Expanded(
-              child: Text(
-                  "Mẹo nhập liệu: Dùng ^ cho lũy thừa (x^2), * cho nhân, sqrt() cho căn bậc 2",
-                  style: theme.textTheme.bodySmall?.copyWith(color: AppColors.success, fontWeight: FontWeight.w500, fontSize: 15)
-              )
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _cameraButton(ThemeData theme, IconData icon, String label) {
+  Widget _cameraActionBtn(String label, IconData icon, bool isMain, ImageSource source) {
     return Expanded(
       child: InkWell(
-        onTap: () {},
+        onTap: () async {
+          final XFile? image = await _picker.pickImage(source: source, imageQuality: 80);
+          if (image != null) setState(() => _selectedImage = File(image.path));
+        },
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 20),
           decoration: BoxDecoration(
+            color: isMain ? AppColors.primary.withOpacity(0.05) : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: theme.dividerColor),
+            border: Border.all(color: isMain ? AppColors.primary : AppColors.textHint.withOpacity(0.3)),
           ),
           child: Column(
             children: [
-              Icon(icon, color: AppColors.primary),
+              Icon(icon, color: isMain ? AppColors.primary : AppColors.textHint),
               const SizedBox(height: 8),
-              Text(label, style: theme.textTheme.labelMedium),
+              Text(label, style: TextStyle(color: isMain ? AppColors.primary : AppColors.textHint, fontWeight: FontWeight.bold)),
             ],
           ),
         ),
@@ -258,108 +231,104 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
     );
   }
 
-  Widget _buildInstructionBox(ThemeData theme) {
+  // ================= 4. COMMON COMPONENTS =================
+  Widget _buildInfoBox(Color color, IconData icon, String text) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-          color: AppColors.primary.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(20)
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(16)),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w500))),
+        ],
       ),
+    );
+  }
+
+  Widget _buildGuideBox() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.05), borderRadius: BorderRadius.circular(20)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Hướng dẫn chụp ảnh", style: theme.textTheme.titleSmall?.copyWith(color: AppColors.primary)),
+          const Text("Hướng dẫn chụp ảnh", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
-          _step(theme, "1", "Chụp rõ nét, đủ ánh sáng"),
-          _step(theme, "2", "Cả bài toán nằm trong khung"),
-          _step(theme, "3", "Tránh bóng che và nhòe"),
+          _guideStep("1", "Chụp rõ nét, đủ ánh sáng"),
+          _guideStep("2", "Cả bài toán nằm trong khung"),
+          _guideStep("3", "Tránh bóng che và nhòe"),
         ],
       ),
     );
   }
 
-  Widget _step(ThemeData theme, String num, String text) {
+  Widget _guideStep(String num, String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        children: [
-          CircleAvatar(
-              radius: 9,
-              backgroundColor: AppColors.primary,
-              child: Text(num, style: const TextStyle(fontSize: 10, color: Colors.white))
-          ),
-          const SizedBox(width: 12),
-          Text(text, style: theme.textTheme.bodyMedium),
-        ],
-      ),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(children: [
+        CircleAvatar(radius: 9, backgroundColor: AppColors.primary, child: Text(num, style: const TextStyle(fontSize: 10, color: Colors.white))),
+        const SizedBox(width: 12),
+        Text(text, style: const TextStyle(fontSize: 13)),
+      ]),
     );
   }
 
-  // ================= ACTION BUTTON (XỬ LÝ CHUYỂN TRANG) =================
+  // ================= 5. ACTION BUTTON =================
   Widget _buildActionButton(ThemeData theme) {
+    final solverProvider = Provider.of<SolverProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context);
+
     return Container(
       padding: const EdgeInsets.all(20),
-      child: ElevatedButton(
-        style: theme.elevatedButtonTheme.style,
-        onPressed: () {
-          String problemText = _controller.text.trim();
+      child: SizedBox(
+        width: double.infinity,
+        height: 55,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          ),
+          onPressed: solverProvider.isLoading ? null : () async {
+            String? pText = _tabIndex == 0 ? _controller.text.trim() : null;
+            if (_tabIndex == 0 && pText!.isEmpty) { _showMsg("Vui lòng nhập đề bài!"); return; }
+            if (_tabIndex == 1 && _selectedImage == null) { _showMsg("Vui lòng chụp ảnh!"); return; }
 
-          if (_tabIndex == 0) { // Tab Nhập tay
-            if (problemText.isEmpty) {
-              _showErrorSnackBar("Vui lòng nhập bài toán trước khi giải!");
-              return;
+            try {
+              final result = await solverProvider.solve(
+                text: pText,
+                image: _tabIndex == 1 ? _selectedImage : null,
+                token: authProvider.token ?? "",
+              );
+
+              if (result != null && mounted) {
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (context) => ChatScreen(
+                    problem: _tabIndex == 0 ? pText! : "Bài toán qua hình ảnh",
+                    initialSolution: result,
+                  ),
+                ));
+              }
+            } catch (e) {
+              _showMsg(e.toString());
             }
-          } else { // Tab Chụp ảnh
-            // CHÚ Ý: Đây là nơi bạn sẽ gọi logic nhận diện ảnh thực tế
-            // Nếu chưa có, hãy tạm thời gán một chuỗi mặc định không rỗng
-            problemText = "Bài toán từ camera: 2x + 5 = 11";
-          }
-
-          // Đảm bảo dữ liệu gửi đi cuối cùng không rỗng
-          if (problemText.isEmpty) {
-            _showErrorSnackBar("Nội dung bài toán không hợp lệ!");
-            return;
-          }
-
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChangeNotifierProvider(
-                create: (_) => ChatProvider(),
-                child: ChatScreen(problem: problemText),
-              ),
-            ),
-          );
-        },
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.auto_awesome_rounded, size: 20),
-            const SizedBox(width: 12),
-            Text(_tabIndex == 0 ? "Giải ngay" : "Nhận diện & Giải"),
-          ],
+          },
+          child: solverProvider.isLoading
+              ? const CircularProgressIndicator(color: Colors.white)
+              : Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.auto_awesome, color: Colors.white),
+              const SizedBox(width: 10),
+              Text(_tabIndex == 0 ? "Giải ngay" : "Nhận diện & Giải", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // Hàm hiển thị thông báo lỗi nhanh
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.error_outline, color: Colors.white),
-            const SizedBox(width: 10),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: AppColors.error,
-        behavior: SnackBarBehavior.floating, // Hiển thị dạng nổi cho đẹp
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: const Duration(seconds: 3),
-      ),
-    );
+  void _showMsg(String m) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m), backgroundColor: AppColors.error));
   }
 }

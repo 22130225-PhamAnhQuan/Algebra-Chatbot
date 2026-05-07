@@ -37,11 +37,11 @@ class UserService {
   }
 
   // CẬP NHẬT PROFILE
-  static Future<void> updateProfile({required String name, required String email}) async {
+  static Future<void> updateProfile({required String name}) async {
     final response = await http.put(
       Uri.parse('${ApiConfig.baseUrl}/users/update'),
       headers: await _getHeaders(),
-      body: jsonEncode({'name': name, 'email': email}),
+      body: jsonEncode({'name': name}),
     );
 
     if (response.statusCode != 200) {

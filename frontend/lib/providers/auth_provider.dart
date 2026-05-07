@@ -9,19 +9,23 @@ class AuthProvider with ChangeNotifier {
   UserModel? _user;
   bool _isLoading = false;
   String _error = '';
+  String? _cachedToken;
 
   UserModel? get user => _user;
   bool get isLoading => _isLoading;
   String get error => _error;
+  String? get token => _cachedToken;
 
   // 1. Tải thông tin User
   Future<void> loadUser() async {
     try {
       _isLoading = true;
 
-      // Gọi API lấy profile
-      final userData = await UserService.getUserProfile();
+      // Lấy token từ SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      _cachedToken = prefs.getString('token');
 
+      final userData = await UserService.getUserProfile();
       if (userData != null) {
         _user = userData;
         _error = '';
@@ -31,7 +35,7 @@ class AuthProvider with ChangeNotifier {
       _user = null;
     } finally {
       _isLoading = false;
-      notifyListeners(); // Đây là lúc UI nhận được tín hiệu để vẽ lại "quan"
+      notifyListeners();
     }
   }
 
@@ -40,9 +44,8 @@ class AuthProvider with ChangeNotifier {
     try {
       _isLoading = true;
 
-      await UserService.updateProfile(name: name, email: email);
-      await loadUser(); // Tải lại thông tin mới
-      print("AuthProvider đã nhận user: ${_user?.name}");
+      await UserService.updateProfile(name: name);
+      await loadUser();
       return true;
     } catch (e) {
       _error = e.toString();
