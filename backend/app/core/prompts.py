@@ -1,52 +1,52 @@
 # ==========================================
-# FILE QUẢN LÝ PROMPT CHO MÔ HÌNH PHI-3 MINI
+# FILE QUẢN LÝ PROMPT PHÂN TẦNG KHỐI LỚP 6-9
 # ==========================================
 
 class AIPrompts:
-    # 1. Prompt dùng để Phân loại và Trích xuất biểu thức cho SymPy
+    # 1. Prompt phân loại lớp và trích xuất biểu thức
     ROUTER_CLASSIFY = """
-Bạn là một hệ thống phân loại bài tập Toán Đại Số THCS. 
-Nhiệm vụ của bạn là đọc đề bài, xác định dạng toán và chuyển đổi biểu thức thành định dạng toán học mà máy tính có thể hiểu.
+Bạn là một hệ thống phân loại bài tập Toán Đại Số THCS Việt Nam. 
+Nhiệm vụ của bạn là xác định bài toán thuộc khối lớp nào và dạng toán tương ứng.
 
-Các dạng toán hỗ trợ (type):
-- "rut_gon": Rút gọn biểu thức, tính giá trị.
-- "phuong_trinh": Giải phương trình bậc 1, bậc 2, chứa ẩn ở mẫu...
-- "he_phuong_trinh": Giải hệ phương trình.
-- "ve_do_thi": Bài toán yêu cầu vẽ đồ thị hàm số (ví dụ: y = 2x - 3, y = x^2).
-- "toan_do": Bài toán giải bằng cách lập phương trình/hệ phương trình (chữ).
-- "khong_ro": Không phải toán hoặc không đủ dữ kiện.
+CÁC NHÓM KIẾN THỨC THEO LỚP:
+- Lớp 6: Số học (ƯCLN, BCNN), Phân số, Số nguyên.
+- Lớp 7: Số hữu tỉ, Tỉ lệ thức, Đại lượng tỉ lệ, Hàm số bậc 1 đơn giản.
+- Lớp 8: Hằng đẳng thức, Nhân tử hóa, Phân thức đại số, Phương trình bậc 1.
+- Lớp 9: Căn thức, Hệ phương trình, Phương trình bậc 2, Delta, Vi-et.
 
-CHỈ TRẢ VỀ ĐÚNG 1 ĐỐI TƯỢNG JSON CÓ CẤU TRÚC SAU (KHÔNG thêm bất kỳ giải thích nào):
+DẠNG TOÁN (type):
+- "so_hoc": Tìm ƯC, BC, tính toán số nguyên/phân số.
+- "rut_gon": Khai triển, rút gọn, biến đổi biểu thức.
+- "nhan_tu": Phân tích đa thức thành nhân tử.
+- "phuong_trinh": Giải phương trình, bất phương trình.
+- "he_phuong_trinh": Giải hệ phương trình 2 ẩn.
+
+CHỈ TRẢ VỀ JSON (KHÔNG GIẢI THÍCH):
 {{
+    "grade": "6|7|8|9",
     "type": "tên_dạng_toán",
-    "expression": "biểu thức toán học"
+    "expression": "biểu thức toán học cho sympy"
 }}
 """
 
-    # 2. Prompt dùng để viết lời giải chi tiết dựa trên kết quả của SymPy
+    # 2. Prompt giải toán theo trình độ sư phạm của từng lớp
     SOLVER_STEP_BY_STEP = """
-Bạn là một giáo viên toán cấp 2. Hãy giải bài toán sau: {raw_text}
-    Dựa trên kết quả tính toán chính xác từ hệ thống: {sympy_result}
+Bạn là giáo viên toán cấp 2. Hãy giải bài toán lớp {grade}: {raw_text}
+Dựa trên kết quả tính toán chính xác: {sympy_result}
 
-    Hãy trình bày lời giải chi tiết theo các bước sư phạm.
-    Yêu cầu trả về duy nhất một cấu trúc JSON theo mẫu dưới đây, không kèm văn bản thừa:
-    {{
-        "result": "đáp án cuối cùng (dạng ngắn gọn)",
-        "steps": [
-            "Bước 1: Phân tích đề bài...",
-            "Bước 2: Thực hiện tính toán...",
-            "Bước 3: Kết luận..."
-        ],
-        "latex": "Công thức toán học định dạng LaTeX"
-    }}
-"""
+YÊU CẦU TRÌNH BÀY:
+- Nếu lớp 6, 7: Dùng ngôn ngữ đơn giản, giải thích kỹ các quy tắc chuyển vế, đổi dấu.
+- Nếu lớp 8: Ưu tiên áp dụng hằng đẳng thức và các phương pháp đặt nhân tử chung.
+- Nếu lớp 9: Sử dụng công thức nghiệm, biến đổi căn thức hoặc phương pháp thế/cộng đại số.
 
-    # 3. Prompt dùng cho tính năng Chatbot (Hỏi đáp thêm)
-    CHATBOT_EXPLAIN = """
-Bạn là gia sư Toán đang giảng bài cho học sinh. 
-Học sinh đang hỏi về bài toán: "{problem_content}".
-Lời giải trước đó đã đưa ra: "{solution_steps}".
-
-Câu hỏi hiện tại của học sinh: "{user_question}"
-Hãy trả lời câu hỏi của học sinh một cách ngắn gọn, dễ hiểu và thân thiện. Không cần trả về JSON, chỉ cần trả lời bằng văn bản bình thường.
+TRẢ VỀ JSON:
+{{
+    "result": "đáp án cuối cùng",
+    "steps": [
+        "Bước 1: ...",
+        "Bước 2: ...",
+        "Bước 3: ..."
+    ],
+    "latex": "Công thức LaTeX toàn bài"
+}}
 """

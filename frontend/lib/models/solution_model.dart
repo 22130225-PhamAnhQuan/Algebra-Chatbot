@@ -3,11 +3,13 @@ class SolutionModel {
   final String result;
   final List<String> steps;
   final String latex;
+  final String grade;
 
   SolutionModel({
     required this.result,
     required this.steps,
     required this.latex,
+    required this.grade,
   });
 
   factory SolutionModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class SolutionModel {
       result: data['result']?.toString() ?? "",
       steps: parsedSteps,
       latex: data['latex']?.toString() ?? "",
+      grade: json['grade']?.toString() ?? '9',
     );
   }
 }

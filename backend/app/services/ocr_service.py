@@ -1,35 +1,72 @@
-import pytesseract
-from PIL import Image
+import easyocr
 import io
+import numpy as np
+import cv2
+from PIL import Image
 from app.core.exceptions import OCRError
 
-
 class OcrService:
+    # Khởi tạo Reader với tiếng Việt và tiếng Anh.
+    # gpu=True nếu máy bạn có card đồ họa NVIDIA, False nếu dùng CPU.
+    _reader = None
+
+    @classmethod
+    def get_reader(cls):
+        if cls._reader is None:
+            cls._reader = easyocr.Reader(['vi', 'en'], gpu=False)
+        return cls._reader
+
     @classmethod
     async def extract_text_from_image(cls, image_bytes: bytes) -> str:
         """
-        Sử dụng Tesseract OCR để nhận dạng đề bài từ ảnh chụp.
+        Sử dụng EasyOCR để nhận dạng đề bài từ ảnh chụp.
         """
         try:
-            # 1. Chuyển đổi mảng byte nhận từ Flutter thành đối tượng Image (Pillow)
-            image = Image.open(io.BytesIO(image_bytes))
+            # 1. Chuyển đổi bytes thành mảng numpy để OpenCV xử lý
+            nparr = np.frombuffer(image_bytes, np.uint8)
+            image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-            # 2. Tiền xử lý nhẹ (optional): Chuyển về ảnh xám để Tesseract đọc chuẩn hơn
-            image = image.convert('L')
+            if image is None:
+                raise OCRError(detail="Không thể đọc dữ liệu ảnh.")
 
-            # 3. Cấu hình Tesseract:
-            # --oem 3: Sử dụng engine mặc định (LSTM)
-            # --psm 6: Coi toàn bộ ảnh là một khối văn bản duy nhất
-            custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789xyz+-*/=()^., '
+            # 2. Tiền xử lý ảnh với OpenCV để tăng độ chính xác
+            # Chuyển xám và khử nhiễu nhẹ
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            denoised = cv2.fastNlMeansDenoising(gray, h=10)
 
-            extracted_text = pytesseract.image_to_string(image, config=custom_config)
+            # 3. Nhận diện văn bản
+            reader = cls.get_reader()
+            # detail=0 để chỉ lấy chuỗi văn bản, bỏ qua tọa độ khung hình
+            results = reader.readtext(denoised, detail=0)
 
-            # 4. Kiểm tra nếu không đọc được gì thì văng lỗi Custom Exception đã viết
-            if not extracted_text.strip():
-                raise OCRError()
+            # 4. Hậu xử lý chuỗi
+            extracted_text = " ".join(results).strip()
 
-            return extracted_text.strip()
+            if not extracted_text:
+                raise OCRError(detail="OCR không tìm thấy ký tự nào trong ảnh.")
+
+            # Tự động sửa một số lỗi ký tự toán học phổ biến của OCR
+            clean_text = cls._clean_math_text(extracted_text)
+
+            return clean_text
 
         except Exception as e:
-            # Nếu có lỗi hệ thống (chưa cài Tesseract engine), báo lỗi rõ ràng
-            raise OCRError(detail=f"Lỗi kỹ thuật OCR: {str(e)}")
+            raise OCRError(detail=f"Lỗi hệ thống OCR (EasyOCR): {str(e)}")
+
+    @staticmethod
+    def _clean_math_text(text: str) -> str:
+        """Làm sạch các ký tự lạ thường gặp khi quét toán học"""
+        replacements = {
+            '—': '-',
+            '–': '-',
+            '×': '*',
+            '÷': '/',
+            ':': '/',
+            'x2': 'x^2', # Lỗi phổ biến: số mũ biến thành số thường
+            'x3': 'x^3',
+            'o': '0',   # Nhầm chữ o với số 0
+            '|': '',    # Lọc các vạch nhiễu
+        }
+        for old, new in replacements.items():
+            text = text.replace(old, new)
+        return text
