@@ -8,7 +8,7 @@ from app.core.dependencies import get_current_user
 
 router = APIRouter(prefix="/history", tags=["History"])
 
-@router.get("/", response_model=List[HistoryDetailResponse])
+@router.get("", response_model=List[HistoryDetailResponse])
 def read_history(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)

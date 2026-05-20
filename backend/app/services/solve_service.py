@@ -1,80 +1,111 @@
-from sqlalchemy.orm import Session
+import logging
+import re
+
+from app.services.solver.detector import detect_type
+from app.services.solver.linear_solver import LinearSolver
+from app.services.solver.quadratic_solver import QuadraticSolver
+from app.services.solver.system_solver import SystemSolver
+from app.services.solver.fraction_solver import FractionSolver
+from app.services.solver.inequality_solver import InequalitySolver
+from app.services.solver.simplify_solver import SimplifySolver
 from app.services.solver.ai_solver import AISolver
-from app.services.ocr_service import OcrService
-from app.models.problem import Problem
-from app.models.solution import Solution
-from app.models.history import History
-from app.models.ai_log import AILog
-import time
+
+logger = logging.getLogger(__name__)
+
+_SOLVERS = {
+    "linear": LinearSolver(),
+    "quadratic": QuadraticSolver(),
+    "system": SystemSolver(),
+    "fraction": FractionSolver(),
+    "inequality": InequalitySolver(),
+    "simplify": SimplifySolver(),
+}
+_AI_SOLVER = AISolver()
+
+_RULE_BASED_TYPES = set(_SOLVERS.keys())
 
 
-class SolveService:
-    @classmethod
-    async def handle_math_solving(
-            cls, db: Session, user_id: int, text: str = None, image_bytes: bytes = None
-    ):
-        start_time = time.time()
-        input_type = "text"
-        raw_text = text
+def clean_step(text: str) -> str:
+    """Làm sạch 1 dòng step: Xóa *, format ngoặc và khoảng trắng"""
+    text = str(text)
+    text = text.replace("*", "")
+    # Xóa ngoặc quanh số nguyên: (10) -> 10, (-10) -> -10
+    text = re.sub(r'\(([-]?\d+)\)', r'\1', text)
+    # Căn chỉnh khoảng trắng cho đẹp
+    text = text.replace("+", " + ").replace("=", " = ")
+    text = re.sub(r'(?<!\s)-(?!\s)', ' - ', text)
+    # Gom khoảng trắng thừa
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
 
-        # 1. Xử lý OCR nếu người dùng gửi ảnh
-        if image_bytes:
-            input_type = "image"
-            # Sử dụng EasyOCR đã nâng cấp
-            raw_text = await OcrService.extract_text_from_image(image_bytes)
 
-        # 2. Giải toán qua AI Pipeline (Trả về JSON có grade, steps, result, latex)
-        solution_data = await AISolver.solve(raw_text)
-        latency = int((time.time() - start_time) * 1000)
+def optimize_steps(raw_steps: list) -> list:
+    """Lọc mảng steps: Xóa các bước trùng lặp liên tiếp"""
+    cleaned = []
+    for step in raw_steps:
+        c_step = clean_step(step)
 
-        # 3. Lưu vào Database (PostgreSQL)
-        # Lưu Problem: Thêm thông tin khối lớp vào content nếu muốn (tùy chọn)
-        grade = solution_data.get('grade', 'Chưa xác định')
-        new_problem = Problem(
-            user_id=user_id,
-            content=raw_text,
-            input_type=input_type
-        )
-        db.add(new_problem)
-        db.flush()
+        if not cleaned or c_step != cleaned[-1]:
+            cleaned.append(c_step)
+    return cleaned
 
-        # Chuẩn hóa steps (giữ logic ép kiểu chuỗi an toàn của bạn)
-        raw_steps = solution_data.get('steps', [])
-        formatted_steps = []
-        for step in raw_steps:
-            if isinstance(step, str):
-                formatted_steps.append(step)
-            elif isinstance(step, dict):
-                val = list(step.values())[0] if step.values() else ""
-                formatted_steps.append(str(val))
-            else:
-                formatted_steps.append(str(step))
 
-        # 4. Lưu Solution
-        # Mình bổ sung thêm thông tin Grade vào phần model để sau này dễ thống kê
-        new_solution = Solution(
-            problem_id=new_problem.id,
-            result=str(solution_data.get('result', '')),
-            steps="|".join(formatted_steps),
-            latex=solution_data.get('latex', ''),
-            model=f"phi3-mini (Lớp {grade}) + sympy"  # Lưu vết lớp mấy
-        )
+# ==========================================
 
-        db.add(new_solution)
-        db.flush()
 
-        # 5. Lưu History & Log
-        db.add(History(user_id=user_id, problem_id=new_problem.id, solution_id=new_solution.id))
-        db.add(AILog(
-            user_id=user_id,
-            problem_id=new_problem.id,
-            input=raw_text,
-            output=str(solution_data.get('result', '')),
-            latency_ms=latency,
-            status="success"
-        ))
+def solve_math(content: str) -> dict:
+    problem_type = detect_type(content)
+    logger.info("Detected type: %s | content: %.80s", problem_type, content)
 
-        db.commit()
+    if problem_type in _RULE_BASED_TYPES:
+        result = _solve_rule_based(content, problem_type)
+    else:
+        logger.info("Type '%s' → AI solver", problem_type)
+        result = _solve_ai(content)
 
-        # Trả về đầy đủ dữ liệu cho Frontend (bao gồm cả grade để Flutter hiển thị)
-        return solution_data
+    result["problem_type"] = problem_type
+
+    return result
+
+
+def _solve_rule_based(content: str, problem_type: str) -> dict:
+    """Giải bằng sympy. Nếu fail → fallback AI."""
+    try:
+        solver = _SOLVERS[problem_type]
+        result = solver.solve(content)
+
+        if "steps" in result and isinstance(result["steps"], list):
+            result["steps"] = optimize_steps(result["steps"])
+
+        logger.info("Rule-based OK: %s", problem_type)
+        return {**result, "solver": problem_type}
+
+    except Exception as e:
+        logger.warning("Rule-based fail (%s): %s → fallback AI", problem_type, e)
+        return _solve_ai(content)
+
+
+def _solve_ai(content: str) -> dict:
+    """Giải bằng Phi-3 Mini. Nếu fail → trả error rõ ràng."""
+    try:
+        result = _AI_SOLVER.solve(content)
+
+        # LỌC RÁC CHO AI SOLVER (Phòng hờ AI bị "nói nhịu", lặp từ)
+        if "steps" in result and isinstance(result["steps"], list):
+            result["steps"] = optimize_steps(result["steps"])
+
+        logger.info("AI solver OK")
+        return {**result, "solver": "ai"}
+
+    except Exception as e:
+        logger.error("AI solver fail: %s", e)
+        return {
+            "success": False,
+            "solver": "error",
+            "result": "Không thể giải bài toán này",
+            "steps": [
+                "⚠️ Hệ thống gặp lỗi khi xử lý bài toán.",
+                f"Chi tiết: {e}",
+                "💡 Hãy thử diễn đạt lại đề bài rõ hơn.",
+            ],
+        }

@@ -15,14 +15,24 @@ class HistoryService:
             Solution.result,
             Solution.steps,
             Solution.latex
-        ).join(Problem, History.problem_id == Problem.id) \
-            .join(Solution, History.solution_id == Solution.id) \
+        ).outerjoin(Problem, History.problem_id == Problem.id) \
+            .outerjoin(Solution, History.solution_id == Solution.id) \
             .filter(History.user_id == user_id) \
             .order_by(History.created_at.desc()) \
             .all()
 
-        # Chuyển đổi từ Row object sang list of dict để khớp với Pydantic
-        return [dict(r._mapping) for r in results]
+        return [
+            {
+                "id": r.id,
+                "created_at": r.created_at,
+                "problem_content": r.problem_content,
+                "input_type": r.input_type,
+                "result": r.result,
+                "steps": r.steps,
+                "latex": r.latex,
+            }
+            for r in results
+        ]
 
     @staticmethod
     def delete_history_item(db: Session, history_id: int, user_id: int):

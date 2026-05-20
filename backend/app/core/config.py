@@ -21,6 +21,7 @@ EMAIL_FROM = os.getenv("EMAIL_FROM")
 # Google & AI
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 OLLAMA_URL = os.getenv("OLLAMA_URL")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Thời gian hết hạn
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 120))

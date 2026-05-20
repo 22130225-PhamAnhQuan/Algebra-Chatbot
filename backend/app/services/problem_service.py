@@ -3,7 +3,7 @@ from app.models.problem import Problem
 from app.models.solution import Solution
 from app.models.history import History
 from app.models.ai_log import AILog
-from app.services.ai_service import solve_math_problem
+from app.services.solver.ai_solver import AISolver
 import time
 
 
@@ -21,7 +21,7 @@ def solve_problem(db: Session, user_id: int, content: str):
 
     # 2. Gọi AI
     start = time.time()
-    ai_result = solve_math_problem(content)
+    ai_result = AISolver(content)
     latency = int((time.time() - start) * 1000)
 
     # 3. Lưu solution

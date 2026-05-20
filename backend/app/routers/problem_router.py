@@ -9,7 +9,7 @@ from app.services.problem_service import solve_problem
 router = APIRouter(prefix="/problem", tags=["Problem"])
 
 
-@router.post("/solve")
+@router.post("")
 def solve(
     req: ProblemResponse,
     db: Session = Depends(get_db),
