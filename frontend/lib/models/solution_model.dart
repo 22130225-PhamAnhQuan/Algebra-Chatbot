@@ -1,37 +1,112 @@
-// lib/models/solution_model.dart
 class SolutionModel {
   final String result;
-  final List<String> steps;
+  final List<StepModel> steps;
   final String latex;
-  final String grade;
+
+  // GRAPH SUPPORT
+  final String? image;
+  final String? solver;
+  final String? type;
+  final Map<String, dynamic>? features;
 
   SolutionModel({
     required this.result,
     required this.steps,
     required this.latex,
-    required this.grade,
+    this.image,
+    this.solver,
+    this.type,
+    this.features,
   });
 
   factory SolutionModel.fromJson(Map<String, dynamic> json) {
-    // API của bạn trả về data bọc ngoài (thấy từ Swagger)
-    var data = json['data'] ?? json; // Dự phòng nếu sau này backend bỏ bọc 'data'
+    final data = json['data'] ?? json['solution'] ?? json;
 
-    // Xử lý an toàn mảng steps
-    var rawSteps = data['steps'] ?? [];
-    List<String> parsedSteps = [];
+    final rawSteps = data['steps'];
 
+    List<StepModel> parsedSteps = [];
     if (rawSteps is List) {
-      parsedSteps = rawSteps.map((s) => s.toString()).toList();
-    } else if (rawSteps is String) {
-      // Xử lý trường hợp backend trả về chuỗi nối bằng dấu |
-      parsedSteps = rawSteps.split('|').where((s) => s.isNotEmpty).toList();
+      parsedSteps = rawSteps.asMap().entries.map((entry) {
+        final index = entry.key;
+        final s = entry.value;
+
+        // STEP JSON
+        if (s is Map<String, dynamic>) {
+          return StepModel.fromJson(s);
+        }
+
+        // STEP STRING
+        return StepModel(
+          stepNumber: index + 1,
+          description: s.toString(),
+          latex: '',
+        );
+      }).toList();
+    }
+
+    // =========================
+    // STRING STEPS
+    // =========================
+    else if (rawSteps is String) {
+      parsedSteps = rawSteps
+          .split('\n')
+          .where((e) => e.trim().isNotEmpty)
+          .map((s) => StepModel(
+        stepNumber: 0,
+        description: s.trim(),
+        latex: '',
+      ))
+          .toList();
     }
 
     return SolutionModel(
       result: data['result']?.toString() ?? "",
       steps: parsedSteps,
       latex: data['latex']?.toString() ?? "",
-      grade: json['grade']?.toString() ?? '9',
+
+      // GRAPH
+      image: data['image']?.toString(),
+      solver: data['solver']?.toString(),
+      type: data['type']?.toString(),
+
+      // FEATURES
+      features: data['features'] is Map<String, dynamic>
+          ? data['features']
+          : null,
+    );
+  }
+
+  // =========================
+  // HELPERS
+  // =========================
+
+  bool get isGraph {
+    return solver != null &&
+        solver!.startsWith("graph");
+  }
+
+  bool get hasImage {
+    return image != null &&
+        image!.isNotEmpty;
+  }
+}
+
+class StepModel {
+  final int stepNumber;
+  final String description;
+  final String latex;
+
+  StepModel({
+    required this.stepNumber,
+    required this.description,
+    required this.latex,
+  });
+
+  factory StepModel.fromJson(Map<String, dynamic> json) {
+    return StepModel(
+      stepNumber: json['step_number'] ?? 0,
+      description: json['description']?.toString() ?? "",
+      latex: json['latex']?.toString() ?? "",
     );
   }
 }

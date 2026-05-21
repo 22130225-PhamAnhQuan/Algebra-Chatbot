@@ -12,6 +12,7 @@ import 'forgotpw_screen.dart';
 import 'profile_screen.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
+import 'admin/admin_dashboard_screen.dart'; // 🚀 BỔ SUNG: Import màn hình Admin của bạn vào đây
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -68,16 +69,35 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       await prefs.setString('token', token);
 
       if (mounted) {
+        // Hàm này sẽ nạp thông tin User vào State của AuthProvider
         await context.read<AuthProvider>().loadUser();
       }
 
       if (!mounted) return;
       setState(() => _loading = false);
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
+      // 🚀 BỔ SUNG: LẤY THÔNG TIN ROLE TỪ AUTH_PROVIDER ĐỂ ĐIỀU HƯỚNG
+      final authProvider = context.read<AuthProvider>();
+
+      // Thầy giả định trong AuthProvider của em model user có thuộc tính 'role' hoặc getter 'role'.
+      // Nếu file auth_provider.dart của em viết hoa thường hoặc cấu trúc khác (ví dụ: authProvider.user.role), hãy chỉnh lại cho khớp nhé!
+      final String userRole = authProvider.user?.role ?? 'USER';
+
+      print("DEBUG 🔍: Quyền hạn đăng nhập của tài khoản này là -> $userRole");
+
+      if (userRole == 'ADMIN') {
+        // Nếu là ADMIN -> Chuyển sang màn hình quản trị vừa băm tách
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => AdminDashboardScreen(token: token)),
+        );
+      } else {
+        // Nếu là học sinh (USER) -> Vào trang giải toán học sinh như cũ
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      }
 
     } catch (e) {
       setState(() => _loading = false);
@@ -92,7 +112,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       } else if (rawError.contains('Connection refused')) {
         friendlyMessage = 'Không thể kết nối đến máy chủ';
       } else {
-        // Nếu không khớp các lỗi trên thì mới hiện thông báo gốc (đã lọc bớt rác)
         friendlyMessage = rawError.replaceAll('Exception: ', '');
       }
 
@@ -100,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            friendlyMessage, // Hiện câu thông báo đã "dịch"
+            friendlyMessage,
             style: GoogleFonts.dmSans(fontWeight: FontWeight.w500, color: Colors.white),
           ),
           backgroundColor: Colors.red.shade600,
@@ -135,7 +154,14 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       }
 
       if (!mounted) return;
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+
+      // 🚀 BỔ SUNG ĐIỀU HƯỚNG CHO GOOGLE LOGIN (Nếu tài khoản Google đó có quyền ADMIN)
+      final authProvider = context.read<AuthProvider>();
+      if (authProvider.user?.role == 'ADMIN') {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => AdminDashboardScreen(token: accessToken)));
+      } else {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+      }
     } catch (e) {
       setState(() => _loading = false);
       if (!mounted) return;
@@ -145,15 +171,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    // 💡 LẤY THÔNG TIN THEME TẠI ĐÂY ĐỂ DÙNG MÀU ĐỘNG
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor, // Tự động đổi Sáng/Tối
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // Background decoration
           Positioned(
             top: -60, right: -60,
             child: Container(
@@ -182,7 +206,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         style: GoogleFonts.dmSans(
                           fontSize: 26,
                           fontWeight: FontWeight.w800,
-                          color: theme.colorScheme.onSurface, // Tự trắng khi tối
+                          color: theme.colorScheme.onSurface,
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -191,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         'Đăng nhập để tiếp tục giải toán',
                         style: GoogleFonts.dmSans(
                           fontSize: 15,
-                          color: theme.colorScheme.onSurface.withOpacity(0.6), // Tự đổi màu xám/trắng
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
                       ),
                       const SizedBox(height: 36),
@@ -278,7 +302,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   }
 }
 
-// 💡 CÁC WIDGET CON ĐÃ ĐƯỢC ĐỒNG BỘ MÀU THEME
 class _FieldLabel extends StatelessWidget {
   final String label;
   const _FieldLabel({required this.label});
@@ -329,7 +352,7 @@ class _SocialLoginButton extends StatelessWidget {
         minimumSize: const Size(double.infinity, 54),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         side: BorderSide(color: theme.dividerTheme.color ?? AppColors.divider, width: 1.5),
-        backgroundColor: theme.colorScheme.surface, // Tự xám đen khi tối
+        backgroundColor: theme.colorScheme.surface,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -341,7 +364,7 @@ class _SocialLoginButton extends StatelessWidget {
             style: GoogleFonts.dmSans(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: theme.colorScheme.onSurface, // Chữ tự trắng
+              color: theme.colorScheme.onSurface,
             ),
           ),
         ],

@@ -10,6 +10,8 @@ import 'formula_screen.dart';
 import 'profile_screen.dart';
 import 'history_screen.dart';
 import '../models/history_model.dart';
+import 'chat_screen.dart';
+import '../models/solution_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -72,7 +74,11 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const SolveProblemScreen()),
-        );
+        ).then((_) {
+          context.read<HistoryProvider>().fetchHistory();
+
+          FocusScope.of(context).unfocus();
+        });
       },
       child: Container(
         width: 52,
@@ -143,7 +149,7 @@ class HomeContent extends StatelessWidget {
           _buildSectionTitle(context, "Bài toán gần đây", hasViewAll: true),
           // Hiển thị 3 bài gần nhất
           RecentHistoryMiniList(
-            historyItems: historyProvider.historyList.take(3).toList(),
+            historyItems: historyProvider.historyList.take(5).toList(),
           ),
           const SizedBox(height: 100),
         ],
@@ -286,8 +292,18 @@ class RecentHistoryMiniList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (historyItems.isEmpty) {
-      return const Center(child: Text("Chưa có lịch sử gần đây"));
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Center(
+          child: Text(
+            "Chưa có lịch sử gần đây",
+            style: TextStyle(color: Colors.grey),
+          ),
+        ),
+      );
     }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return ListView.builder(
       shrinkWrap: true,
@@ -296,22 +312,97 @@ class RecentHistoryMiniList extends StatelessWidget {
       itemCount: historyItems.length,
       itemBuilder: (ctx, i) {
         final item = historyItems[i];
+
         return Card(
+          elevation: 0,
+          color: isDark ? AppColors.surfaceDark : Colors.white,
           margin: const EdgeInsets.only(bottom: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.grey.shade100),
+            // Hỗ trợ viền cho cả Light/Dark Mode
+            side: BorderSide(color: isDark ? Colors.white10 : Colors.grey.shade200),
           ),
-          child: ListTile(
-            leading: const Icon(Icons.history_edu, color: AppColors.primary),
-            title: Text(item.problemContent,
-                maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(item.result),
-            trailing: const Icon(Icons.chevron_right, size: 18),
-            onTap: () {
-              // Có thể điều hướng xem chi tiết tại đây
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () async {
+              final oldSolution = SolutionModel(
+                result: item.result,
+                latex: item.latex,
+                steps: item.steps,
+              );
+
+              // Đợi người dùng xem xong ChatScreen...
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatScreen(
+                    problem: item.problemContent,
+                    initialSolution: oldSolution,
+                  ),
+                ),
+              );
+
+              // ... Quay về là làm mới dữ liệu luôn (Bỏ cái if == true đi)
+              if (context.mounted) {
+                context.read<HistoryProvider>().fetchHistory();
+              }
             },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  // Icon Avatar chữ Q đồng bộ với bên HistoryScreen
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      "Q",
+                      style: TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  // Phần nội dung (Đã ép maxLines: 1 để chống tràn)
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.problemContent,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "→ ${item.result}",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Mũi tên điều hướng
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: isDark ? Colors.white38 : Colors.grey,
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       },

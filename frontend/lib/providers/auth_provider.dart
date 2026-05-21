@@ -37,6 +37,7 @@ class AuthProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+    print("DANH TÍNH USER ĐĂNG NHẬP: ID=${_user!.id} - Email=${_user!.email} - Quyền=${_user!.role}");
   }
 
   // 2. Cập nhật hồ sơ (Hàm mà dòng 191 báo thiếu)

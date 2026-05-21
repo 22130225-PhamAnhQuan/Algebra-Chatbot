@@ -41,17 +41,29 @@ class ChatProvider extends ChangeNotifier {
     if (problemText.trim().isEmpty) return;
 
     isLoading = true;
-    messages.clear();
     notifyListeners();
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? "";
+      final token = prefs.getString('token');
+      if (token == null) {
+        throw "Chưa đăng nhập";
+      }
 
-      messages.add(ChatMessage(sender: 'USER', content: problemText, type: 'text', createdAt: DateTime.now()));
+      messages.add(ChatMessage(
+        sender: 'USER',
+        content: problemText,
+        type: 'text',
+        createdAt: DateTime.now(),
+      ));
+
       notifyListeners();
 
-      final result = await SolverService.solveProblem(problemText: problemText, token: token);
+      final result = await SolverService.solve(
+        text: problemText,
+        token: token,
+      );
+
       solutionData = result;
 
       messages.add(ChatMessage(
@@ -60,8 +72,14 @@ class ChatProvider extends ChangeNotifier {
         type: 'text',
         createdAt: DateTime.now(),
       ));
+
     } catch (e) {
-      messages.add(ChatMessage(sender: 'BOT', content: "Lỗi: $e", type: 'text', createdAt: DateTime.now()));
+      messages.add(ChatMessage(
+        sender: 'BOT',
+        content: "Lỗi: $e",
+        type: 'text',
+        createdAt: DateTime.now(),
+      ));
     } finally {
       isLoading = false;
       notifyListeners();
@@ -72,23 +90,39 @@ class ChatProvider extends ChangeNotifier {
   Future<void> sendUserMessage(String content) async {
     if (content.trim().isEmpty) return;
 
-    messages.add(ChatMessage(sender: 'USER', content: content, type: 'text', createdAt: DateTime.now()));
+    final message = ChatMessage(
+      sender: 'USER',
+      content: content,
+      type: 'text',
+      createdAt: DateTime.now(),
+    );
+
+    messages.add(message);
     isSending = true;
     notifyListeners();
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? "";
+      final token = prefs.getString('token');
+      if (token == null) {
+        throw "Chưa đăng nhập";
+      }
 
       final botMsg = await ChatApiService.sendMessage(
-        conversationId: 0, // Tạm thời để 0 hoặc ID thực tế
+        conversationId: 0,
         content: content,
         token: token,
       );
 
       messages.add(botMsg);
+
     } catch (e) {
-      debugPrint("Lỗi: $e");
+      messages.add(ChatMessage(
+        sender: 'BOT',
+        content: "Lỗi: $e",
+        type: 'text',
+        createdAt: DateTime.now(),
+      ));
     } finally {
       isSending = false;
       notifyListeners();
