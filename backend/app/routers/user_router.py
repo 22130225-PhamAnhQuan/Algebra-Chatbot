@@ -14,7 +14,8 @@ def get_profile(user = Depends(get_current_user)):
     return {
         "id": user.id,
         "email": user.email,
-        "name": user.name
+        "name": user.name,
+        "role": user.role
     }
 
 @router.put("/update")

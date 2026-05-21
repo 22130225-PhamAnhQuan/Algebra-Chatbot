@@ -151,6 +151,7 @@ def admin_get_ai_logs(
             {
                 "id": log.id,
                 "user_id": log.user_id,
+                "user_name": log.name,
                 "problem_id": log.problem_id,
                 "input": log.input,
                 "output": log.output,
