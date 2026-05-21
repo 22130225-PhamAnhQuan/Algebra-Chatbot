@@ -7,32 +7,50 @@ class SolverProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  List<SolutionModel> _history = [];
-  List<SolutionModel> get history => _history;
+  String? _error;
+  String? get error => _error;
 
-  // Hàm xử lý chính: Chấp nhận cả Text hoặc File
+  List<SolutionModel> _history = [];
+  List<SolutionModel> get history => List.unmodifiable(_history);
+
   Future<SolutionModel?> solve({
     String? text,
     File? image,
     required String token,
   }) async {
+    if ((text == null || text.trim().isEmpty) && image == null) {
+      _error = "Không có dữ liệu đầu vào";
+      notifyListeners();
+      return null;
+    }
+
     _isLoading = true;
-    notifyListeners(); // Thông báo cho UI hiển thị Loading
+    _error = null;
+    notifyListeners();
 
     try {
-      final result = await SolverService.solveProblem(
-        problemText: text,
-        imageFile: image,
+      final result = await SolverService.solve(
+        text: text,
+        image: image,
         token: token,
       );
 
-      _history.add(result);
+      _history = [..._history, result];
+      notifyListeners();
+
       return result;
     } catch (e) {
-      rethrow; // Đẩy lỗi ra để Screen hiển thị SnackBar/Dialog
+      _error = e.toString();
+      notifyListeners();
+      return null;
     } finally {
       _isLoading = false;
-      notifyListeners(); // Tắt Loading dù thành công hay thất bại
+      notifyListeners();
     }
+  }
+
+  void clearHistory() {
+    _history = [];
+    notifyListeners();
   }
 }

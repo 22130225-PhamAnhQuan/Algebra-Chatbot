@@ -12,6 +12,7 @@ class Solution(Base):
     steps = Column(Text)
     latex = Column(Text)
     model = Column(String(100))
+    problem_type = Column(String(50), default="unknown")
     created_at = Column(DateTime, server_default=func.now())
 
     # Relationships

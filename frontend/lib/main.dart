@@ -10,6 +10,7 @@ import 'providers/formula_provider.dart';
 import '../core/theme/app_theme.dart';
 import 'providers/navigation_provider.dart';
 import 'providers/solver_provider.dart';
+import 'providers/admin_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +24,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => HistoryProvider()),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
-        ChangeNotifierProvider(create: (_) => SolverProvider())
+        ChangeNotifierProvider(create: (_) => SolverProvider()),
+        ChangeNotifierProvider(create: (_) => AdminProvider()),
       ],
       child: const MyApp(),
     ),

@@ -2,57 +2,99 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+
 import '../core/constants/api_config.dart';
 import '../models/solution_model.dart';
 
 class SolverService {
-  static Future<SolutionModel> solveProblem({
-    String? problemText,
-    File? imageFile,
+
+  static Future<SolutionModel> solveText({
+    required String problemText,
     required String token,
   }) async {
-    try {
-      // Endpoint đúng theo router của bạn: /solver/solver
-      final uri = Uri.parse('${ApiConfig.baseUrl}/solver/solver');
-      var request = http.MultipartRequest('POST', uri);
+    final uri = Uri.parse('${ApiConfig.baseUrl}/solve');
 
-      // 1. Thêm Header
-      request.headers['Authorization'] = 'Bearer $token';
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "content": problemText,
+      }),
+    );
 
-      // 2. Thêm trường Text (Form) nếu có
-      if (problemText != null) {
-        request.fields['text'] = problemText;
-      }
+    final body = jsonDecode(utf8.decode(response.bodyBytes));
 
-      // 3. Thêm trường Image (File) nếu có
-      if (imageFile != null) {
-        request.files.add(await http.MultipartFile.fromPath(
-          'image', // Key phải khớp với tham số 'image' trong router FastAPI
-          imageFile.path,
-          contentType: MediaType('image', 'jpeg'),
-        ));
-      }
-
-      // 4. Gửi và nhận phản hồi
-      final streamedResponse = await request.send();
-      final response = await http.Response.fromStream(streamedResponse);
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> body = jsonDecode(utf8.decode(response.bodyBytes));
-
-        // Backend trả về {"status": "success", "data": {...}}
-        if (body['status'] == 'success') {
-          return SolutionModel.fromJson(body['data']);
-        } else {
-          throw 'Xử lý thất bại';
-        }
-      } else if (response.statusCode == 401) {
-        throw 'Phiên đăng nhập hết hạn';
-      } else {
-        throw 'Lỗi hệ thống: ${response.statusCode}';
-      }
-    } catch (e) {
-      rethrow;
+    if (response.statusCode != 200) {
+      throw body['detail'] ?? 'Server error';
     }
+
+    if (body['success'] != true) {
+      throw body.toString();
+    }
+
+    final solution = body['solution'];
+
+    if (solution is! Map<String, dynamic>) {
+      throw "Invalid solution format";
+    }
+
+    return SolutionModel.fromJson(solution);
+  }
+
+  static Future<SolutionModel> solveImage({
+    required File imageFile,
+    required String token,
+  }) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/solve-image');
+
+    var request = http.MultipartRequest('POST', uri);
+
+    request.headers['Authorization'] = 'Bearer $token';
+
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        'file',
+        imageFile.path,
+        contentType: MediaType('image', 'jpeg'),
+      ),
+    );
+
+    final streamed = await request.send();
+    final response = await http.Response.fromStream(streamed);
+
+    final body = jsonDecode(utf8.decode(response.bodyBytes));
+
+    if (response.statusCode != 200) {
+      throw body['detail'] ?? 'Server error';
+    }
+
+    if (body['success'] != true) {
+      throw body.toString();
+    }
+
+    final solution = body['solution'];
+
+    if (solution is! Map<String, dynamic>) {
+      throw "Invalid solution format";
+    }
+
+    return SolutionModel.fromJson(solution);
+  }
+
+  static Future<SolutionModel> solve({
+    String? text,
+    File? image,
+    required String token,
+  }) async {
+    if ((text == null || text.trim().isEmpty) && image == null) {
+      throw Exception("Empty input");
+    }
+
+    return image != null
+        ? solveImage(imageFile: image, token: token)
+        : solveText(problemText: text!, token: token);
   }
 }

@@ -1,8 +1,7 @@
-import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import '../core/constants/api_config.dart';
+
 import '../models/history_model.dart';
 import '../services/history_service.dart';
 
@@ -11,12 +10,16 @@ class HistoryProvider extends ChangeNotifier {
   bool _isLoading = false;
   String _errorMessage = "";
 
-  List<HistoryItem> get historyList => _historyList;
+  Timer? _autoSyncTimer;
+
+  List<HistoryItem> get historyList => List.unmodifiable(_historyList);
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
-  // Hàm lấy danh sách lịch sử từ Backend
-  Future<void> fetchHistory() async {
+  // =========================
+  // FETCH HISTORY
+  // =========================
+  Future<void> fetchHistory({bool merge = false}) async {
     _isLoading = true;
     _errorMessage = "";
     notifyListeners();
@@ -25,38 +28,94 @@ class HistoryProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? "";
 
-      // Gọi thông qua Service vừa viết
       final data = await HistoryApiService.fetchHistory(token);
 
-      _historyList = data.map((json) => HistoryItem.fromJson(json)).toList();
+      if (data is List) {
+        final List<HistoryItem> temp = [];
+
+        for (var item in data) {
+          try {
+            temp.add(HistoryItem.fromJson(item));
+          } catch (_) {}
+        }
+
+        if (merge) {
+          final Map<int, HistoryItem> map = {
+            for (var item in _historyList) item.id: item
+          };
+
+          for (var item in temp) {
+            map[item.id] = item;
+          }
+
+          _historyList = map.values.toList()
+            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        } else {
+          _historyList = temp
+            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        }
+      }
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = "Lỗi tải lịch sử: $e";
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  // Hàm xóa một mục lịch sử
+  // =========================
+  // 🔥 AUTO SYNC (REALTIME)
+  // =========================
+  void startAutoSync() {
+    _autoSyncTimer?.cancel();
+
+    _autoSyncTimer = Timer.periodic(
+      const Duration(seconds: 5),
+          (timer) {
+        fetchHistory(merge: true);
+      },
+    );
+  }
+
+  void stopAutoSync() {
+    _autoSyncTimer?.cancel();
+    _autoSyncTimer = null;
+  }
+
+  // =========================
+  // DELETE
+  // =========================
   Future<void> deleteHistory(int historyId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? "";
 
-      // Gọi API xóa từ Service
-      final success = await HistoryApiService.deleteHistoryItem(token, historyId);
+      final success =
+      await HistoryApiService.deleteHistoryItem(token, historyId);
 
       if (success) {
-        // Xóa item khỏi danh sách cục bộ để cập nhật UI ngay lập tức
-        _historyList.removeWhere((item) => item.id == historyId);
-        notifyListeners(); // Thông báo cho UI vẽ lại
-      } else {
-        _errorMessage = "Không thể xóa mục này.";
+        _historyList.removeWhere((e) => e.id == historyId);
         notifyListeners();
       }
     } catch (e) {
-      _errorMessage = "Lỗi kết nối khi xóa.";
+      _errorMessage = "Lỗi khi xóa: $e";
       notifyListeners();
     }
+  }
+
+  // =========================
+  // OPTIMISTIC ADD
+  // =========================
+  void addLocalHistory(HistoryItem item) {
+    _historyList.insert(0, item);
+    notifyListeners();
+  }
+
+  // =========================
+  // CLEAR
+  // =========================
+  void clearHistory() {
+    _historyList = [];
+    notifyListeners();
   }
 }

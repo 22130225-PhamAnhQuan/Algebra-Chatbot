@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
+from starlette import status
 
 from app.db.database import get_db
 from app.models.user import User
@@ -34,3 +35,17 @@ def get_current_user(
         raise HTTPException(status_code=404, detail="User not found")
 
     return user
+
+def get_current_admin(
+    current_user: User = Depends(get_current_user)
+) -> User:
+    """
+    Dependency kiểm tra quyền Admin.
+    Kế thừa lại get_current_user để không phải giải mã JWT lần hai.
+    """
+    if current_user.role != "ADMIN":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Quyền truy cập bị từ chối. Chức năng này chỉ dành cho tài khoản Admin!"
+        )
+    return current_user

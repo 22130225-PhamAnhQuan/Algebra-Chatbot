@@ -1,91 +1,95 @@
-import sympy
-import httpx
-import json
-import re
+import os
+import requests
 from app.core.config import OLLAMA_URL
-from app.core.prompts import AIPrompts
+
+
+_SYSTEM_PROMPT = """
+Bạn là AlgebraBot — gia sư toán THCS. Giải bài toán đại số theo đúng format sau:
+
+📌 **Phân tích:** [nhận dạng dạng bài]
+📌 **Bước 1:** [nội dung + phép tính cụ thể]
+📌 **Bước 2:** [nội dung + phép tính cụ thể]
+...
+📌 **Kiểm tra:** [thay đáp án vào bài gốc]
+✅ **Kết quả:** [đáp án cuối kèm đơn vị]
+
+Quy tắc:
+- Mỗi bước phải có phép tính số cụ thể, không chỉ mô tả
+- Nếu PT bậc 2: tính Delta, xét 3 trường hợp
+- Nếu căn thức: nêu điều kiện xác định trước
+- Nếu bất PT: xét chiều khi nhân/chia số âm
+- Trả lời bằng tiếng Việt
+- Nếu không chắc, ghi "Cần kiểm tra lại"
+""".strip()
 
 
 class AISolver:
-    @classmethod
-    async def call_phi3(cls, prompt: str) -> dict:
-        # Logic payload giữ nguyên như của bạn
-        payload = {
-            "model": "phi3:mini",
-            "prompt": prompt,
-            "stream": False,
-            "format": "json",
-            "options": {"temperature": 0.1, "num_predict": 512, "num_thread": 4}
-        }
+
+    # fix: đọc model từ env thay vì hardcode
+    def __init__(self):
+        self.model   = os.getenv("OLLAMA_MODEL", "phi3:mini")
+        self.timeout = 60  # fix: thêm timeout tránh treo
+
+    def solve(self, content: str) -> dict:
         try:
-            async with httpx.AsyncClient(timeout=180.0) as client:
-                response = await client.post(OLLAMA_URL, json=payload)
-                if response.status_code != 200:
-                    return {"type": "khong_ro", "expression": ""}
+            # fix: dùng /api/chat + messages thay vì /api/generate + prompt đơn
+            # → có system prompt, model hiểu context và format đúng hơn
+            response = requests.post(
+                OLLAMA_URL,
+                json={
+                    "model":  self.model,
+                    "stream": False,
+                    "messages": [
+                        {"role": "system", "content": _SYSTEM_PROMPT},
+                        {"role": "user",   "content": f"Giải bài toán sau:\n{content}"},
+                    ],
+                    "options": {
+                        "temperature":    0.1,   # thấp = nhất quán hơn với toán
+                        "num_predict":    1200,
+                        "repeat_penalty": 1.1,
+                    },
+                },
+                timeout=self.timeout,  # fix: thêm timeout
+            )
 
-                raw_response = response.json()['response'].strip()
-                json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)
-                return json.loads(json_match.group()) if json_match else json.loads(raw_response)
-        except Exception as e:
-            print(f"LỖI AI: {e}")
-            return {"type": "khong_ro", "expression": "", "grade": "9"}
+            # fix: kiểm tra HTTP status trước khi parse
+            response.raise_for_status()
+            data = response.json()
 
-    @classmethod
-    def process_math(cls, grade: str, math_type: str, expression: str):
-        """Hàm điều hướng xử lý SymPy theo khối lớp và dạng toán"""
-        try:
-            # Khai báo các biến toán học THCS phổ biến
-            x, y, z, n = sympy.symbols('x y z n')
-            expr_str = expression.replace('^', '**').replace(':', '/')
-            # Tự động thêm dấu nhân (ví dụ 2x -> 2*x)
-            expr_str = re.sub(r'(\d)([a-zA-Z])', r'\1*\2', expr_str)
+            # fix: /api/chat trả về data["message"]["content"]
+            # khác /api/generate trả về data["response"]
+            raw = data.get("message", {}).get("content", "").strip()
 
-            # --- KHỐI LỚP 6 & 7: SỐ HỌC & BIỂU THỨC ĐƠN GIẢN ---
-            if grade in ["6", "7"]:
-                if math_type == "so_hoc":
-                    nums = [int(n) for n in re.findall(r'\d+', expr_str)]
-                    return f"ƯCLN: {sympy.gcd(*nums)}, BCNN: {sympy.lcm(*nums)}"
-                return f"Kết quả tính toán: {sympy.simplify(expr_str)}"
+            if not raw:
+                raise ValueError("Phi-3 Mini trả về nội dung rỗng")
 
-            # --- KHỐI LỚP 8: HẰNG ĐẲNG THỨC & NHÂN TỬ HÓA ---
-            elif grade == "8":
-                if math_type == "nhan_tu":
-                    return f"Phân tích thành nhân tử: {sympy.factor(expr_str)}"
-                return f"Rút gọn biểu thức: {sympy.simplify(sympy.expand(expr_str))}"
+            # fix: tách thành list steps thay vì nhét 1 cục
+            steps  = [line for line in raw.split("\n") if line.strip()]
+            result = self._extract_result(steps)
 
-            # --- KHỐI LỚP 9: CĂN THỨC, HỆ PT, PT BẬC 2 ---
-            else:
-                if math_type == "he_phuong_trinh":
-                    eqs = [sympy.Eq(sympy.sympify(e.split('=')[0]), sympy.sympify(e.split('=')[1]))
-                           for e in expr_str.split(',')]
-                    return f"Nghiệm hệ (x, y): {sympy.solve(eqs, (x, y))}"
+            return {"result": result, "steps": steps}
 
-                # Giải phương trình bậc 2 hoặc chứa căn
-                if '=' in expr_str:
-                    l, r = expr_str.split('=')
-                    res = sympy.solve(sympy.Eq(sympy.sympify(l), sympy.sympify(r)), x)
-                else:
-                    res = sympy.solve(sympy.sympify(expr_str), x)
-                return f"Tập nghiệm x = {res}"
+        # fix: xử lý từng loại lỗi cụ thể
+        except requests.exceptions.ConnectionError:
+            raise ValueError(
+                "Không kết nối được Ollama. Chạy: `ollama serve`"
+            )
+        except requests.exceptions.Timeout:
+            raise ValueError(
+                f"Ollama timeout sau {self.timeout}s. "
+                "Model đang load lần đầu — thử lại sau."
+            )
+        except requests.exceptions.HTTPError as e:
+            raise ValueError(f"Ollama lỗi HTTP {e.response.status_code}")
+        except (KeyError, ValueError) as e:
+            raise ValueError(f"Lỗi xử lý response: {e}")
 
-        except Exception as e:
-            return f"SymPy không giải trực tiếp được ({e}), AI hãy phân tích logic."
-
-    @classmethod
-    async def solve(cls, raw_text: str):
-        # Bước 1: Router xác định Lớp (Grade) và Dạng (Type)
-        meta = await cls.call_phi3(AIPrompts.ROUTER_CLASSIFY + f"\nĐề: {raw_text}")
-        grade = meta.get('grade', '9')
-        math_type = meta.get('type', 'phuong_trinh')
-        expression = meta.get('expression', '')
-
-        # Bước 2: SymPy tính toán dựa trên khối lớp đã xác định
-        sympy_result = cls.process_math(grade, math_type, expression)
-
-        # Bước 3: Viết lời giải theo trình độ sư phạm lớp tương ứng
-        solve_prompt = AIPrompts.SOLVER_STEP_BY_STEP.format(
-            grade=grade,
-            raw_text=raw_text,
-            sympy_result=sympy_result
-        )
-        return await cls.call_phi3(solve_prompt)
+    def _extract_result(self, steps: list[str]) -> str:
+        """Lấy dòng có ✅ làm result ngắn gọn"""
+        for line in reversed(steps):
+            if "✅" in line or "kết quả" in line.lower():
+                return (line
+                        .replace("✅", "")
+                        .replace("**Kết quả:**", "")
+                        .strip())
+        return steps[-1] if steps else ""

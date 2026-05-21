@@ -35,6 +35,7 @@ Pillow==10.4.0               # Xử lý định dạng ảnh
 # OCR & MATH ENGINE (MỚI BỔ SUNG)
 # =========================
 easyocr==1.7.2               # Nhận diện chữ viết tay/toán học
+pix2tex==0.1.4
 sympy==1.13.3                # Trái tim giải toán đại số 6, 7, 8, 9
 numpy==1.26.4                # Hỗ trợ tính toán mảng cho EasyOCR
 
