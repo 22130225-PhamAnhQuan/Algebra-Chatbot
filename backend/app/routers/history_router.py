@@ -13,7 +13,7 @@ def read_history(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    # Trả về danh sách bài giải cho Quan
+    # Trả về danh sách bài giải
     return HistoryService.get_my_history(db, user_id=current_user.id)
 
 @router.delete("/{history_id}")

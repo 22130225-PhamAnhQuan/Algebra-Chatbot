@@ -68,7 +68,7 @@ def logout(
         return {"message": "Đăng xuất thành công. Đã thu hồi phiên đăng nhập."}
 
     except Exception as e:
-        db.rollback()  # Hoàn tác nếu có lỗi DB
+        db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Lỗi hệ thống khi đăng xuất"

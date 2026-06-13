@@ -4,7 +4,9 @@ from .solution import Solution
 from .conversation import Conversation
 from .message import Message
 from .history import History
-from .formula import Formula
+from .grade import Grade
+from .chapter import Chapter
+from .lesson import Lesson
 from .ai_log import AILog
 from .refresh_token import RefreshToken
 from .otp_code import OtpCode

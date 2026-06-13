@@ -60,5 +60,4 @@ def send_otp_email(to_email: str, otp: str):
     </div>
     """
 
-    # Gọi hàm gửi email của bạn
     send_email(to_email, subject, body)

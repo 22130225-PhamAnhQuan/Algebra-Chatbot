@@ -7,7 +7,7 @@ def register_user(db: Session, email: str, name: str, password: str):
     existing = db.query(User).filter(User.email == email).first()
 
     if existing:
-        raise Exception("Email already exists")
+        raise Exception("Email này đã tồn tại, vui lòng nhập email khác!")
 
     user = User(
         email=email,
@@ -26,10 +26,10 @@ def login_user(db: Session, email: str, password: str):
     user = db.query(User).filter(User.email == email).first()
 
     if not user:
-        raise Exception("User not found")
+        raise Exception("Email không tồn tại")
 
     if not verify_password(password, user.password):
-        raise Exception("Wrong password")
+        raise Exception("Mật khẩu không chính xác")
 
     token = create_access_token({
         "user_id": user.id

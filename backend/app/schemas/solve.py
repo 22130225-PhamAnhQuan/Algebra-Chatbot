@@ -6,6 +6,14 @@ from typing import List, Optional
 # DETAIL SOLUTION
 # =========================================================
 
+class SolveRequest(BaseModel):
+
+    content: str
+
+    grade_id: Optional[int] = None
+    chapter_id: Optional[int] = None
+    lesson_id: Optional[int] = None
+
 class SolutionDetail(BaseModel):
 
     result: str
@@ -21,11 +29,6 @@ class SolutionDetail(BaseModel):
     method: Optional[str] = None
 
     problem_type: Optional[str] = None
-
-
-# =========================================================
-# MAIN RESPONSE
-# =========================================================
 
 class SolveResponse(BaseModel):
 

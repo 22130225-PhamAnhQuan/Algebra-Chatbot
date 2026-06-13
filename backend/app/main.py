@@ -1,34 +1,40 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from app.db.database import engine
 from app.db.database import Base
 from fastapi.staticfiles import StaticFiles
 import os
 
-from app.routers import admin_router
-# ROUTERS
+# ROUTERS IMPORT
 from app.routers.auth_router import router as auth_router
 from app.routers.problem_router import router as problem_router
 from app.routers.chat_router import router as chat_router
 from app.routers.user_router import router as user_router
-from app.routers.formula_router import router as formula_router
 from app.routers.solve_router import router as solve_router
 from app.routers.history_router import router as history_router
 from app.routers.admin_router import router as admin_router
+from app.routers.curriculum_router import router as curriculum_router
 
-app = FastAPI()
+app = FastAPI(
+    title="Algebra Chatbot API",
+    description="Hệ thống Backend hỗ trợ giải toán Đại số THCS chuẩn SGK",
+    version="1.0.0"
+)
 
-# AUTO CREATE TABLE
 Base.metadata.create_all(bind=engine)
 
-# ROUTES
-app.include_router(auth_router)
-app.include_router(problem_router)
-app.include_router(chat_router)
-app.include_router(user_router)
-app.include_router(formula_router)
-app.include_router(solve_router)
-app.include_router(history_router)
-app.include_router(admin_router)
+api_v1_router = APIRouter(prefix="/api/v1")
+
+# Đăng ký toàn bộ các router con
+api_v1_router.include_router(auth_router)
+api_v1_router.include_router(problem_router)
+api_v1_router.include_router(chat_router)
+api_v1_router.include_router(user_router)
+api_v1_router.include_router(solve_router)
+api_v1_router.include_router(history_router)
+api_v1_router.include_router(admin_router)
+api_v1_router.include_router(curriculum_router)
+
+app.include_router(api_v1_router)
 
 @app.get("/")
 def root():
