@@ -1,15 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, func
-from typing import Optional
 
 from app.db.database import get_db
+from app.models.chapter import Chapter
+from app.models.grade import Grade
+from app.models.lesson import Lesson
 from app.models.user import User
 from app.models.problem import Problem
 from app.models.solution import Solution
 from app.models.history import History
+from app.schemas.curriculum import LessonDetailResponse
+from app.services.curriculum_service import get_lesson_by_id
 
-# Khối Import Model an toàn
 try:
     from app.models.formula import Formula
     from app.models.ai_log import AILog
@@ -19,7 +22,6 @@ except ImportError:
     Formula = getattr(Base, '_decl_class_registry', {}).get('Formula')
     AILog = getattr(Base, '_decl_class_registry', {}).get('AILog')
 
-# Người gác cổng bảo mật
 from app.core.dependencies import get_current_admin
 
 router = APIRouter(
@@ -27,38 +29,74 @@ router = APIRouter(
     tags=["Admin Mobile Management"]
 )
 
-
-# ==========================================
-# 1. THỐNG KÊ HỆ THỐNG (DASHBOARD STATISTICS)
-# ==========================================
-
 @router.get("/dashboard-stats")
 def admin_get_dashboard_statistics(
-        db: Session = Depends(get_db),
-        admin: User = Depends(get_current_admin)
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin)
 ):
-    """API Thống kê tổng quan hệ thống dành cho màn hình chính của Admin trên điện thoại"""
-    total_students = db.query(User).filter(User.role == 'USER').count()
+    total_students = (
+        db.query(User)
+        .filter(User.role == "USER")
+        .count()
+    )
+
     total_problems = db.query(Problem).count()
-    total_formulas = db.query(Formula).count() if Formula is not None else 0
 
-    ai_solved_count = db.query(Solution).filter(Solution.model == 'ai').count()
-    sympy_solved_count = db.query(Solution).filter(Solution.model != 'ai').count()
+    total_lessons = db.query(Lesson).count()
 
-    type_stats = db.query(
-        Solution.problem_type,
-        func.count(Solution.id)
-    ).group_by(Solution.problem_type).all()
+    ai_solved_count = (
+        db.query(Solution)
+        .filter(Solution.model == "ai")
+        .count()
+    )
 
-    problem_types_distribution = {p_type: count for p_type, count in type_stats if p_type}
+    sympy_solved_count = (
+        db.query(Solution)
+        .filter(Solution.model != "ai")
+        .count()
+    )
 
-    ai_performance = {"total_tokens_used": 0, "avg_latency_ms": 0.0}
+    type_stats = (
+        db.query(
+            Solution.problem_type,
+            func.count(Solution.id)
+        )
+        .group_by(Solution.problem_type)
+        .all()
+    )
+
+    problem_types_distribution = {
+        p_type: count
+        for p_type, count in type_stats
+        if p_type
+    }
+
+    ai_performance = {
+        "total_tokens_used": 0,
+        "avg_latency_ms": 0.0
+    }
+
     if AILog is not None:
-        total_tokens = db.query(func.sum(AILog.tokens_used)).scalar() or 0
-        avg_latency = db.query(func.avg(AILog.latency_ms)).scalar() or 0.0
+        total_tokens = (
+            db.query(
+                func.sum(AILog.tokens_used)
+            ).scalar()
+            or 0
+        )
+
+        avg_latency = (
+            db.query(
+                func.avg(AILog.latency_ms)
+            ).scalar()
+            or 0
+        )
+
         ai_performance = {
             "total_tokens_used": int(total_tokens),
-            "avg_latency_ms": round(float(avg_latency), 2)
+            "avg_latency_ms": round(
+                float(avg_latency),
+                2
+            )
         }
 
     return {
@@ -67,28 +105,28 @@ def admin_get_dashboard_statistics(
             "overview": {
                 "total_students": total_students,
                 "total_problems_submitted": total_problems,
-                "total_formulas_in_curriculum": total_formulas
+
+                "total_lessons": total_lessons
             },
+
             "solver_distribution": {
                 "ai_assistant": ai_solved_count,
                 "rule_based_sympy": sympy_solved_count
             },
-            "problem_types_breakdown": problem_types_distribution,
-            "ai_engine_performance": ai_performance
+
+            "problem_types_breakdown":
+                problem_types_distribution,
+
+            "ai_engine_performance":
+                ai_performance
         }
     }
-
-
-# ==========================================
-# 2. QUẢN LÝ TÀI KHOẢN (USER MANAGEMENT)
-# ==========================================
 
 @router.get("/users")
 def admin_get_all_users(
         db: Session = Depends(get_db),
         admin: User = Depends(get_current_admin)
 ):
-    """Lấy danh sách tất cả học sinh có role là USER"""
     users = db.query(User).filter(User.role == 'USER').order_by(User.id).all()
     return {
         "success": True,
@@ -110,7 +148,6 @@ def admin_toggle_user_status(
         db: Session = Depends(get_db),
         admin: User = Depends(get_current_admin)
 ):
-    """Khóa hoặc mở khóa tài khoản của học sinh"""
     user = db.query(User).filter(User.id == user_id, User.role == 'USER').first()
     if not user:
         raise HTTPException(
@@ -129,18 +166,12 @@ def admin_toggle_user_status(
         "is_active": user.is_active
     }
 
-
-# ==========================================
-# 3. QUẢN LÝ LOG HỆ THỐNG AI (AI LOGS MANAGEMENT)
-# ==========================================
-
 @router.get("/ai-logs")
 def admin_get_ai_logs(
         limit: int = 50,
         db: Session = Depends(get_db),
         admin: User = Depends(get_current_admin)
 ):
-    """Lấy danh sách log hoạt động của AI (Bảng ai_logs)"""
     if AILog is None:
         raise HTTPException(status_code=500, detail="Hệ thống chưa cấu hình ORM Model cho bảng ai_logs")
 
@@ -164,18 +195,12 @@ def admin_get_ai_logs(
         ]
     }
 
-
-# ==========================================
-# 4. QUẢN LÝ LỊCH SỬ BÀI GIẢI (HISTORY MANAGEMENT)
-# ==========================================
-
 @router.get("/histories")
 def admin_get_solve_histories(
         limit: int = 50,
         db: Session = Depends(get_db),
         admin: User = Depends(get_current_admin)
 ):
-    """Xem lịch sử giải bài, kết nối thông tin giữa Học sinh, Đề bài và Lời giải"""
     histories = db.query(History).order_by(desc(History.created_at)).limit(limit).all()
 
     result_list = []
@@ -211,144 +236,217 @@ def admin_get_solve_histories(
         "data": result_list
     }
 
-
-# ==========================================
-# 5. QUẢN LÝ GIÁO TRÌNH / CÔNG THỨC TOÁN (FORMULAS MANAGEMENT)
-# ==========================================
-
-@router.get("/formulas")
-def admin_get_all_formulas(
-        grade: Optional[int] = None,
-        db: Session = Depends(get_db),
-        admin: User = Depends(get_current_admin)
+@router.get("/grades")
+def admin_get_grades(
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin)
 ):
-    """Lấy danh sách công thức, hỗ trợ lọc theo Khối lớp (Toán 6 -> Toán 9)"""
-    if Formula is None:
-        raise HTTPException(status_code=500, detail="Hệ thống chưa cấu hình ORM Model cho bảng formulas")
+    grades = (
+        db.query(Grade)
+        .order_by(Grade.id)
+        .all()
+    )
 
-    query = db.query(Formula)
-    if grade is not None:
-        query = query.filter(Formula.grade == grade)
-
-    formulas = query.order_by(Formula.grade, Formula.id).all()
     return {
         "success": True,
         "data": [
             {
-                "id": f.id,
-                "grade": f.grade,
-                "title": f.title,
-                "formula": f.formula,
-                "explanation": f.explanation,
-                "example": f.example,
-                "category": f.category,
-                "created_at": f.created_at
-            } for f in formulas
+                "id": grade.id,
+                "name": grade.name
+            }
+            for grade in grades
         ]
     }
 
-
-@router.get("/formulas/{formula_id}")
-def admin_get_formula_detail(
-        formula_id: int,
-        db: Session = Depends(get_db),
-        admin: User = Depends(get_current_admin)
+@router.get("/grades/{grade_id}/chapters")
+def admin_get_chapters(
+    grade_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin)
 ):
-    """Xem chi tiết một công thức toán học"""
-    if Formula is None:
-        raise HTTPException(status_code=500, detail="Hệ thống chưa cấu hình ORM Model cho bảng formulas")
-
-    formula_item = db.query(Formula).filter(Formula.id == formula_id).first()
-    if not formula_item:
-        raise HTTPException(status_code=404, detail="Không tìm thấy công thức")
-    return {"success": True, "data": formula_item}
-
-
-@router.post("/formulas", status_code=status.HTTP_201_CREATED)
-def admin_create_formula(
-        grade: int,
-        title: str,
-        formula: str,
-        explanation: Optional[str] = None,
-        example: Optional[str] = None,
-        category: Optional[str] = None,
-        db: Session = Depends(get_db),
-        admin: User = Depends(get_current_admin)
-):
-    """Admin thêm mới công thức toán học vào giáo trình sách Kết nối tri thức"""
-    if Formula is None:
-        raise HTTPException(status_code=500, detail="Hệ thống chưa cấu hình ORM Model cho bảng formulas")
-
-    new_formula = Formula(
-        grade=grade,
-        title=title,
-        formula=formula,
-        explanation=explanation,
-        example=example,
-        category=category
+    chapters = (
+        db.query(Chapter)
+        .filter(
+            Chapter.grade_id == grade_id
+        )
+        .order_by(
+            Chapter.chapter_number
+        )
+        .all()
     )
-    db.add(new_formula)
-    db.commit()
-    db.refresh(new_formula)
+
     return {
         "success": True,
-        "message": f"Đã thêm công thức thành công vào danh mục Toán lớp {grade}!",
+        "data": [
+            {
+                "id": chapter.id,
+                "grade_id": chapter.grade_id,
+                "chapter_number": chapter.chapter_number,
+                "title": chapter.title
+            }
+            for chapter in chapters
+        ]
+    }
+
+@router.get("/chapters/{chapter_id}/lessons")
+def admin_get_lessons(
+    chapter_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin)
+):
+    lessons = (
+        db.query(Lesson)
+        .filter(
+            Lesson.chapter_id == chapter_id
+        )
+        .order_by(
+            Lesson.lesson_number
+        )
+        .all()
+    )
+
+    return {
+        "success": True,
+        "data": [
+            {
+                "id": lesson.id,
+                "chapter_id": lesson.chapter_id,
+                "lesson_number": lesson.lesson_number,
+                "title": lesson.title,
+                "theory": lesson.theory,
+                "formula": lesson.formula,
+                "example": lesson.example
+            }
+            for lesson in lessons
+        ]
+    }
+
+@router.post("/lessons")
+def admin_create_lesson(
+    chapter_id: int,
+    lesson_number: int,
+    title: str,
+    theory: str = "",
+    formula: str = "",
+    example: str = "",
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin)
+):
+    lesson = Lesson(
+        chapter_id=chapter_id,
+        lesson_number=lesson_number,
+        title=title,
+        theory=theory,
+        formula=formula,
+        example=example
+    )
+
+    db.add(lesson)
+    db.commit()
+    db.refresh(lesson)
+
+    return {
+        "success": True,
+        "message": "Tạo bài học thành công",
         "data": {
-            "id": new_formula.id,
-            "title": new_formula.title
+            "id": lesson.id
         }
     }
 
-
-@router.put("/formulas/{formula_id}")
-def admin_update_formula(
-        formula_id: int,
-        grade: Optional[int] = None,
-        title: Optional[str] = None,
-        formula: Optional[str] = None,
-        explanation: Optional[str] = None,
-        example: Optional[str] = None,
-        category: Optional[str] = None,
-        db: Session = Depends(get_db),
-        admin: User = Depends(get_current_admin)
+@router.get(
+    "/lessons/{lesson_id}",
+    response_model=LessonDetailResponse
+)
+def get_lesson_detail(
+    lesson_id: int,
+    db: Session = Depends(get_db)
 ):
-    """Admin chỉnh sửa toàn bộ các trường của công thức trong giáo trình KNTT"""
-    if Formula is None:
-        raise HTTPException(status_code=500, detail="Hệ thống chưa cấu hình ORM Model cho bảng formulas")
 
-    formula_item = db.query(Formula).filter(Formula.id == formula_id).first()
-    if not formula_item:
-        raise HTTPException(status_code=404, detail="Không tìm thấy công thức để cập nhật")
+    lesson = get_lesson_by_id(
+        db,
+        lesson_id
+    )
 
-    if grade is not None: formula_item.grade = grade
-    if title is not None: formula_item.title = title
-    if formula is not None: formula_item.formula = formula
-    if explanation is not None: formula_item.explanation = explanation
-    if example is not None: formula_item.example = example
-    if category is not None: formula_item.category = category
+    if lesson is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Lesson not found"
+        )
+
+    return lesson
+
+@router.put("/lessons/{lesson_id}")
+def admin_update_lesson(
+    lesson_id: int,
+    lesson_number: int | None = None,
+    title: str | None = None,
+    theory: str | None = None,
+    formula: str | None = None,
+    example: str | None = None,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin)
+):
+    lesson = (
+        db.query(Lesson)
+        .filter(
+            Lesson.id == lesson_id
+        )
+        .first()
+    )
+
+    if not lesson:
+        raise HTTPException(
+            status_code=404,
+            detail="Không tìm thấy bài học"
+        )
+
+    if lesson_number is not None:
+        lesson.lesson_number = lesson_number
+
+    if title is not None:
+        lesson.title = title
+
+    if theory is not None:
+        lesson.theory = theory
+
+    if formula is not None:
+        lesson.formula = formula
+
+    if example is not None:
+        lesson.example = example
 
     db.commit()
-    db.refresh(formula_item)
-    return {"success": True, "message": "Cập nhật công thức giáo trình thành công!", "data": formula_item}
+    db.refresh(lesson)
 
-
-@router.delete("/formulas/{formula_id}")
-def admin_delete_formula(
-        formula_id: int,
-        db: Session = Depends(get_db),
-        admin: User = Depends(get_current_admin)
-):
-    """Admin xóa một công thức khỏi giáo trình"""
-    if Formula is None:
-        raise HTTPException(status_code=500, detail="Hệ thống chưa cấu hình ORM Model cho bảng formulas")
-
-    formula_item = db.query(Formula).filter(Formula.id == formula_id).first()
-    if not formula_item:
-        raise HTTPException(status_code=404, detail="Không tìm thấy công thức cần xóa")
-
-    db.delete(formula_item)
-    db.commit()
     return {
         "success": True,
-        "message": f"Đã xóa công thức '{formula_item.title}' thành công khỏi kho giáo trình"
+        "message": "Cập nhật bài học thành công"
+    }
+
+@router.delete("/lessons/{lesson_id}")
+def admin_delete_lesson(
+    lesson_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin)
+):
+    lesson = (
+        db.query(Lesson)
+        .filter(
+            Lesson.id == lesson_id
+        )
+        .first()
+    )
+
+    if not lesson:
+        raise HTTPException(
+            status_code=404,
+            detail="Không tìm thấy bài học"
+        )
+
+    db.delete(lesson)
+    db.commit()
+
+    return {
+        "success": True,
+        "message": "Xóa bài học thành công"
     }

@@ -22,3 +22,23 @@ class Problem(Base):
     user = relationship("User", back_populates="problems")
     solutions = relationship("Solution", back_populates="problem", cascade="all, delete-orphan")
     conversations = relationship("Conversation", back_populates="problem")
+    grade_id = Column(
+        Integer,
+        ForeignKey("grades.id"),
+        nullable=True
+    )
+
+    chapter_id = Column(
+        Integer,
+        ForeignKey("chapters.id"),
+        nullable=True
+    )
+
+    lesson_id = Column(
+        Integer,
+        ForeignKey("lessons.id"),
+        nullable=True
+    )
+    grade = relationship("Grade")
+    chapter = relationship("Chapter")
+    lesson = relationship("Lesson")

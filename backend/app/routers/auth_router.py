@@ -51,13 +51,12 @@ def google_auth(req: GoogleAuthRequest, db: Session = Depends(get_db)):
         # 2. Kiểm tra xem email này đã có trong DB chưa
         user = db.query(User).filter(User.email == email).first()
 
-        # 3. Nếu chưa có -> Tạo tài khoản mới
+        # 3. Nếu chưa có Tạo tài khoản mới
         if not user:
-            # Tạo một mật khẩu ngẫu nhiên siêu khó vì họ đăng nhập bằng Google
             random_password = secrets.token_urlsafe(16)
             user = register_user(db, email, name, random_password)
 
-        # 4. Đăng nhập và tạo JWT Access Token (Dùng chung hàm với login bình thường)
+        # 4. Đăng nhập và tạo JWT Access Token
         from app.core.security import create_access_token
         access_token = create_access_token(data={"sub": user.email})
 
@@ -109,27 +108,23 @@ def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
 
 @router.post("/verify-otp")
 def verify_otp_endpoint(req: CheckOTP, db: Session = Depends(get_db)):
-    # 1. Tìm mã OTP chưa sử dụng và mới nhất của email này trong Database
     record = db.query(OtpCode).filter(
         OtpCode.email == req.email,
         OtpCode.is_used == False
     ).order_by(OtpCode.created_at.desc()).first()
 
-    # 2. Kiểm tra các điều kiện gắt gao
     if not record:
         raise HTTPException(status_code=400, detail="Không tìm thấy mã OTP cho email này")
 
     if record.expires_at < datetime.utcnow():
         raise HTTPException(status_code=400, detail="Mã OTP đã hết hạn (quá 5 phút)")
 
-    # Sử dụng hàm verify_otp từ otp_service để so sánh mã gửi lên với mã băm (hash) trong DB
     if not verify_otp(req.otp, record.code_hash):
         raise HTTPException(status_code=400, detail="Mã OTP không chính xác")
 
     record.is_used = True
     db.commit()
 
-    # Nếu qua được hết các chốt chặn trên, tức là OTP đúng!
     return {"message": "OTP hợp lệ, cho phép đổi mật khẩu"}
 
 @router.post("/reset-password")

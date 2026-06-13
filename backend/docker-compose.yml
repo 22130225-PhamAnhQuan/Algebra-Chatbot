@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # 1. Cấu hình dịch vụ Database PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: math_chatbot_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234567
+      POSTGRES_DB: algebra_chatbot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. Cấu hình dịch vụ Backend FastAPI
+  backend:
+    build: .
+    container_name: math_chatbot_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:1234567@db:5432/algebra_chatbot
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

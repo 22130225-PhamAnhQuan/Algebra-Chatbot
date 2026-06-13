@@ -1,21 +1,44 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, CheckConstraint
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+    DateTime,
+    ForeignKey
+)
+
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
+
 from app.db.database import Base
+
 
 class Message(Base):
     __tablename__ = "messages"
 
     id = Column(Integer, primary_key=True, index=True)
-    conversation_id = Column(Integer, ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False)
-    sender = Column(String(10), nullable=False) # 'USER' hoặc 'BOT'
-    content = Column(Text, nullable=False)
-    type = Column(String(20), default="text")
-    created_at = Column(DateTime, server_default=func.now())
 
-    # Relationships
-    conversation = relationship("Conversation", back_populates="messages")
-    __table_args__ = (
-        CheckConstraint(sender.in_(['USER', 'BOT']), name='check_sender'),
-        CheckConstraint(type.in_(['text', 'image', 'latex']), name='check_message_type'),
+    conversation_id = Column(
+        Integer,
+        ForeignKey("conversations.id", ondelete="CASCADE"),
+        nullable=False
+    )
+
+    role = Column(String(20), nullable=False)
+
+    content = Column(Text, nullable=False)
+
+    message_type = Column(
+        String(20),
+        default="text"
+    )
+
+    created_at = Column(
+        DateTime,
+        server_default=func.now()
+    )
+
+    conversation = relationship(
+        "Conversation",
+        back_populates="messages"
     )

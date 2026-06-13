@@ -6,10 +6,12 @@ from app.core.config import SECRET_KEY, ALGORITHM
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(password: str):
-    return pwd_context.hash(password)
+    safe_password = str(password)[:72]
+    return pwd_context.hash(safe_password)
 
 def verify_password(password, hashed):
-    return pwd_context.verify(password, hashed)
+    safe_password = str(password)[:72]
+    return pwd_context.verify(safe_password, hashed)
 
 def create_access_token(data: dict):
     to_encode = data.copy()

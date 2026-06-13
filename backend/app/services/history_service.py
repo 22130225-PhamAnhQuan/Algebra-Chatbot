@@ -36,7 +36,6 @@ class HistoryService:
 
     @staticmethod
     def delete_history_item(db: Session, history_id: int, user_id: int):
-        """Xóa một bản ghi lịch sử của người dùng cụ thể"""
         # Tìm đúng bản ghi thuộc về user đó để tránh xóa nhầm của người khác
         item = db.query(History).filter(
             History.id == history_id,

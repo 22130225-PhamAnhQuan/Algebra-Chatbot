@@ -9,7 +9,6 @@ from app.models.user import User
 
 from app.core.config import SECRET_KEY, ALGORITHM
 
-# cái này giúp lấy token từ header
 security = HTTPBearer()
 
 
@@ -39,10 +38,6 @@ def get_current_user(
 def get_current_admin(
     current_user: User = Depends(get_current_user)
 ) -> User:
-    """
-    Dependency kiểm tra quyền Admin.
-    Kế thừa lại get_current_user để không phải giải mã JWT lần hai.
-    """
     if current_user.role != "ADMIN":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
