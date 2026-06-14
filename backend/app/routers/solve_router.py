@@ -63,7 +63,8 @@ def save_solution_to_db(
             steps=db_steps_str,  # Chuỗi JSON an toàn
             latex=result.get("latex", ""),
             model=result.get("solver", result.get("method", "unknown")),
-            problem_type=result.get("problem_type", "unknown")
+            problem_type=result.get("problem_type", "unknown"),
+            graph_image=result.get("graph_image")
         )
         db.add(solution)
         db.commit()

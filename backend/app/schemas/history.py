@@ -12,6 +12,7 @@ class HistoryDetailResponse(BaseModel):
     result: Optional[str]
     steps: Optional[str]
     latex: Optional[str]
+    graph_image: Optional[str] = None
 
     class Config:
         from_attributes = True

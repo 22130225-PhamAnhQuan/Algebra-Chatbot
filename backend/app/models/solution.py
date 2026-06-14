@@ -15,5 +15,7 @@ class Solution(Base):
     problem_type = Column(String(50), default="unknown")
     created_at = Column(DateTime, server_default=func.now())
 
+    graph_image = Column(Text, nullable=True)
+
     # Relationships
     problem = relationship("Problem", back_populates="solutions")
