@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../providers/admin_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../login_screen.dart';
-import 'admin_formulas_screen.dart';
+import 'admin_curriculum_screen.dart';
 import 'admin_histories_screen.dart';
 import 'admin_logs_screen.dart';
 import 'admin_users_screen.dart';
@@ -27,7 +27,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     });
   }
 
-  // Hàm hiển thị Popup hỏi xác nhận đăng xuất chuẩn bảo mật
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -91,7 +90,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget build(BuildContext context) {
     final adminProv = Provider.of<AdminProvider>(context);
 
-    // Bóc tách an toàn các trường dữ liệu thống kê từ Provider
     final overview = adminProv.stats?['overview'] ?? {};
     final aiPerf = adminProv.stats?['ai_engine_performance'] ?? {};
 
@@ -105,9 +103,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ==========================================
-              // 1. HEADER KHU VỰC CHÀO MỪNG & ĐĂNG XUẤT
-              // ==========================================
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -144,9 +139,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
               const SizedBox(height: 32),
 
-              // ==========================================
-              // 2. HÀNG THẺ THỐNG KÊ NHANH
-              // ==========================================
               Text(
                 'Số liệu tổng quan',
                 style: GoogleFonts.dmSans(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
@@ -174,8 +166,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildStatCard(
-                      title: 'Công thức',
-                      value: "${overview['total_formulas_in_curriculum'] ?? adminProv.formulas.length}",
+                      title: 'Giáo trình',
+                      value: "${overview['total_lessons_in_curriculum'] ?? adminProv.lessons.length}",
                       icon: Icons.menu_book_rounded,
                       color: const Color(0xFFD97706),
                     ),
@@ -184,9 +176,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
               const SizedBox(height: 28),
 
-              // ==========================================
-              // 3. KHỐI HIỆU NĂNG AI ENGINE
-              // ==========================================
               Text(
                 "Hiệu năng Engine AI",
                 style: GoogleFonts.dmSans(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
@@ -210,26 +199,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       value: "${aiPerf['avg_latency_ms'] ?? 0.0} ms",
                       valueColor: const Color(0xFF4F46E5),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      // 🚀 ĐÃ SỬA: Thay thế Colors.slate.shade100 bằng mã Hex chuẩn tránh lỗi
-                      child: Divider(color: const Color(0xFFF1F5F9), thickness: 1.2),
-                    ),
-                    _buildPerformanceTile(
-                      icon: Icons.toll_rounded,
-                      iconColor: const Color(0xFFF59E0B),
-                      title: "Tổng Token tiêu thụ",
-                      value: "${aiPerf['total_tokens_used'] ?? 0} tokens",
-                      valueColor: const Color(0xFFD97706),
-                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 32),
 
-              // ==========================================
-              // 4. LƯỚI ĐIỀU HƯỚNG CÁC PHÂN HỆ QUẢN LÝ
-              // ==========================================
               Text(
                 'Phân hệ quản lý chuyên sâu',
                 style: GoogleFonts.dmSans(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
@@ -256,14 +230,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     },
                   ),
                   _buildMenuCard(
-                    title: 'Công thức Toán',
-                    subtitle: 'Quản lý kho SGK KNTT',
-                    icon: Icons.menu_book_rounded,
+                    title: 'Giáo trình',
+                    subtitle: 'Lớp - Chương - Bài học',
+                    icon: Icons.school_rounded,
                     gradient: const [Color(0xFF0EA5E9), Color(0xFF2563EB)],
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => AdminFormulasScreen(token: widget.token)),
+                          MaterialPageRoute(
+                            builder: (_) => AdminCurriculumScreen(
+                              token: widget.token,
+                            ),
+                          )
                       );
                     },
                   ),

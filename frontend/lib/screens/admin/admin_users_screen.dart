@@ -17,6 +17,15 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   String _searchQuery = '';
   final TextEditingController _searchCtrl = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    // Sử dụng WidgetsBinding để gọi Provider sau khi frame đầu tiên được dựng xong
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AdminProvider>(context, listen: false).fetchAllAdminData(widget.token);
+    });
+  }
+
   // Hàm định dạng ngày tháng hiển thị dạng DD/MM/YYYY từ chuỗi Backend trả về
   String _formatDate(dynamic createdAt) {
     if (createdAt == null) return '--/--/----';

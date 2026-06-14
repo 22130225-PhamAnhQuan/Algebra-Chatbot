@@ -34,6 +34,7 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final solverProvider = context.watch<SolverProvider>();
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -60,11 +61,10 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
           ],
         ),
       ),
-
       body: Column(
         children: [
+          _buildCurriculumInfo(solverProvider, isDark),
           _buildTabSelector(isDark),
-
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -73,8 +73,44 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
                   : _buildManualInput(theme, isDark),
             ),
           ),
-
           _buildActionButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCurriculumInfo(SolverProvider solverProvider, bool isDark) {
+    if (solverProvider.gradeId == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.check_circle, color: AppColors.primary, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              "Lớp ${solverProvider.gradeId} • Chương ${solverProvider.chapterId} • Bài ${solverProvider.lessonId}",
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Icon(Icons.close, size: 18),
+          ),
         ],
       ),
     );
@@ -559,10 +595,6 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
     );
   }
 
-  // =========================================================
-  // SOLVE
-  // =========================================================
-
   Future<void> _solveProblem(
       SolverProvider solverProvider,
       AuthProvider authProvider,
@@ -586,14 +618,16 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
         text: _tabIndex == 1 ? problemText : "",
         image: _tabIndex == 0 ? _selectedImage : null,
         token: authProvider.token ?? "",
+        gradeId: solverProvider.gradeId,
+        chapterId: solverProvider.chapterId,
+        lessonId: solverProvider.lessonId,
       );
 
       if (!mounted) return;
 
       if (result == null) {
         _showMsg(
-          solverProvider.error ??
-              "Không thể giải bài toán",
+          solverProvider.error ?? "Không thể giải bài toán",
         );
         return;
       }
@@ -602,9 +636,7 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
         context,
         MaterialPageRoute(
           builder: (_) => ChatScreen(
-            problem: _tabIndex == 1
-                ? problemText
-                : "Bài toán từ hình ảnh",
+            problem: _tabIndex == 1 ? problemText : "Bài toán từ hình ảnh",
             initialSolution: result,
           ),
         ),
@@ -613,10 +645,6 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
       _showMsg(e.toString());
     }
   }
-
-  // =========================================================
-  // SNACKBAR
-  // =========================================================
 
   void _showMsg(String message) {
     ScaffoldMessenger.of(context).showSnackBar(

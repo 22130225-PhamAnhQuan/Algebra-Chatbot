@@ -11,9 +11,6 @@ class AdminService {
     };
   }
 
-  // ==========================================
-  // 1. THỐNG KÊ HỆ THỐNG (DASHBOARD STATISTICS)
-  // ==========================================
   Future<Map<String, dynamic>?> getDashboardStats(String token) async {
     try {
       final response = await http.get(
@@ -30,9 +27,6 @@ class AdminService {
     }
   }
 
-  // ==========================================
-  // 2. QUẢN LÝ TÀI KHOẢN (USER MANAGEMENT)
-  // ==========================================
   Future<List<dynamic>?> getAllUsers(String token) async {
     try {
       final response = await http.get(
@@ -64,9 +58,6 @@ class AdminService {
     }
   }
 
-  // ==========================================
-  // 3. QUẢN LÝ LOG HỆ THỐNG AI (AI LOGS MANAGEMENT)
-  // ==========================================
   Future<List<dynamic>?> getAILogs(String token, {int limit = 50}) async {
     try {
       final response = await http.get(
@@ -84,9 +75,6 @@ class AdminService {
     }
   }
 
-  // ==========================================
-  // 4. QUẢN LÝ LỊCH SỬ BÀI GIẢI (HISTORY MANAGEMENT)
-  // ==========================================
   Future<List<dynamic>?> getAllHistories(String token, {int limit = 50}) async {
     try {
       final response = await http.get(
@@ -104,90 +92,165 @@ class AdminService {
     }
   }
 
-  // ==========================================
-  // 5. QUẢN LÝ GIÁO TRÌNH / CÔNG THỨC TOÁN (FORMULAS MANAGEMENT)
-  // ==========================================
-
-  // [READ] Lấy danh sách công thức, hỗ trợ lọc theo khối lớp (Toán 6 -> Toán 9)
-  Future<List<dynamic>?> getAllFormulas(String token, {int? grade}) async {
+  Future<List<dynamic>?> getGrades(
+      String token,
+      ) async {
     try {
-      String url = "${ApiConfig.baseUrl}/admin/formulas";
-      if (grade != null) {
-        url += "?grade=$grade";
-      }
       final response = await http.get(
-        Uri.parse(url),
+        Uri.parse(
+          "${ApiConfig.baseUrl}/admin/grades",
+        ),
         headers: _getHeaders(token),
       );
+
       if (response.statusCode == 200) {
-        final result = jsonDecode(utf8.decode(response.bodyBytes));
-        return result['data'];
+        final result = jsonDecode(
+          utf8.decode(response.bodyBytes),
+        );
+
+        return result["data"];
       }
-      return null;
+
+      return [];
     } catch (e) {
-      print("Lỗi getAllFormulas: $e");
-      return null;
+      print("Lỗi getGrades: $e");
+      return [];
     }
   }
 
-  // [READ CHI TIẾT] Lấy thông tin chi tiết đầy đủ của 1 công thức
-  Future<Map<String, dynamic>?> getFormulaDetail(String token, int formulaId) async {
+  Future<List<dynamic>?> getChapters(
+      String token,
+      int gradeId,
+      ) async {
     try {
       final response = await http.get(
-        Uri.parse("${ApiConfig.baseUrl}/admin/formulas/$formulaId"),
+        Uri.parse(
+          "${ApiConfig.baseUrl}/admin/grades/$gradeId/chapters",
+        ),
         headers: _getHeaders(token),
       );
+
       if (response.statusCode == 200) {
-        final result = jsonDecode(utf8.decode(response.bodyBytes));
-        return result['data'];
+        final result = jsonDecode(
+          utf8.decode(response.bodyBytes),
+        );
+
+        return result["data"];
       }
-      return null;
+
+      return [];
     } catch (e) {
-      print("Lỗi getFormulaDetail: $e");
-      return null;
+      print("Lỗi getChapters: $e");
+      return [];
+    }
+  }
+  Future<List<dynamic>?> getLessons(
+      String token,
+      int chapterId,
+      ) async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+          "${ApiConfig.baseUrl}/admin/chapters/$chapterId/lessons",
+        ),
+        headers: _getHeaders(token),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(
+          utf8.decode(response.bodyBytes),
+        );
+
+        return result["data"];
+      }
+
+      return [];
+    } catch (e) {
+      print("Lỗi getLessons: $e");
+      return [];
     }
   }
 
-  // [CREATE] Thêm mới công thức bao gồm đầy đủ các trường (explanation, example, category...)
-  Future<bool> createFormula(String token, Map<String, dynamic> formulaData) async {
+  Future<Map<String, dynamic>?> getLessonDetail(
+      String token,
+      int lessonId,
+      ) async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+          "${ApiConfig.baseUrl}/admin/lessons/$lessonId",
+        ),
+        headers: _getHeaders(token),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(
+          utf8.decode(response.bodyBytes),
+        );
+      }
+
+      return null;
+    } catch (e) {
+      print("Lỗi getLessonDetail: $e");
+      return null;
+    }
+  }
+  Future<bool> createLesson(
+      String token,
+      Map<String, dynamic> data,
+      ) async {
     try {
       final response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/admin/formulas"),
+        Uri.parse(
+          "${ApiConfig.baseUrl}/admin/curriculum/lessons",
+        ),
         headers: _getHeaders(token),
-        body: jsonEncode(formulaData),
+        body: jsonEncode(data),
       );
-      return response.statusCode == 201; // Trả về 201 Created theo đúng Backend
+
+      return response.statusCode == 201;
     } catch (e) {
-      print("Lỗi createFormula: $e");
+      print("Lỗi createLesson: $e");
       return false;
     }
   }
 
-  // [UPDATE] Chỉnh sửa công thức toán học
-  Future<bool> updateFormula(String token, int formulaId, Map<String, dynamic> formulaData) async {
+  Future<bool> updateLesson(
+      String token,
+      int lessonId,
+      Map<String, dynamic> data,
+      ) async {
     try {
       final response = await http.put(
-        Uri.parse("${ApiConfig.baseUrl}/admin/formulas/$formulaId"),
+        Uri.parse(
+          "${ApiConfig.baseUrl}/admin/lessons/$lessonId",
+        ),
         headers: _getHeaders(token),
-        body: jsonEncode(formulaData),
+        body: jsonEncode(data),
       );
+
       return response.statusCode == 200;
     } catch (e) {
-      print("Lỗi updateFormula: $e");
+      print("Lỗi updateLesson: $e");
       return false;
     }
   }
 
-  // [DELETE] Xóa công thức khỏi kho dữ liệu giáo trình
-  Future<bool> deleteFormula(String token, int formulaId) async {
+  Future<bool> deleteLesson(
+      String token,
+      int lessonId,
+      ) async {
     try {
       final response = await http.delete(
-        Uri.parse("${ApiConfig.baseUrl}/admin/formulas/$formulaId"),
+        Uri.parse(
+          "${ApiConfig.baseUrl}/admin/lessons/$lessonId",
+        ),
         headers: _getHeaders(token),
       );
+
       return response.statusCode == 200;
     } catch (e) {
-      print("Lỗi deleteFormula: $e");
+      print("Lỗi deleteLesson: $e");
       return false;
     }
   }

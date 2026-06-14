@@ -4,124 +4,172 @@ import '../services/admin_service.dart';
 class AdminProvider with ChangeNotifier {
   final AdminService _adminService = AdminService();
 
+  bool _isLoading = false;
+
   Map<String, dynamic>? _stats;
+
   List<dynamic> _users = [];
   List<dynamic> _aiLogs = [];
   List<dynamic> _histories = [];
-  List<dynamic> _formulas = [];
-  bool _isLoading = false;
 
-  // Getters công khai để UI tiêu thụ
-  Map<String, dynamic>? get stats => _stats;
-  List<dynamic> get users => _users;
-  List<dynamic> get aiLogs => _aiLogs;
-  List<dynamic> get histories => _histories;
-  List<dynamic> get formulas => _formulas;
+  List<dynamic> _grades = [];
+  List<dynamic> _chapters = [];
+  List<dynamic> _lessons = [];
+
+  int? _selectedGradeId;
+  int? _selectedChapterId;
+
   bool get isLoading => _isLoading;
 
-  // ==========================================
-  // 1. TẢI ĐỒNG LOẠT DỮ LIỆU (READ ALL)
-  // ==========================================
+  Map<String, dynamic>? get stats => _stats;
+
+  List<dynamic> get users => _users;
+
+  List<dynamic> get aiLogs => _aiLogs;
+
+  List<dynamic> get histories => _histories;
+
+  List<dynamic> get grades => _grades;
+
+  List<dynamic> get chapters => _chapters;
+
+  List<dynamic> get lessons => _lessons;
+
+  int? get selectedGradeId => _selectedGradeId;
+
+  int? get selectedChapterId => _selectedChapterId;
+
   Future<void> fetchAllAdminData(String token) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      // Gọi đồng thời hoặc tuần tự các API từ Service
       final statsData = await _adminService.getDashboardStats(token);
+
       if (statsData != null && statsData['success'] == true) {
         _stats = statsData['data'];
       }
 
       _users = await _adminService.getAllUsers(token) ?? [];
+
       _aiLogs = await _adminService.getAILogs(token) ?? [];
+
       _histories = await _adminService.getAllHistories(token) ?? [];
-      _formulas = await _adminService.getAllFormulas(token) ?? [];
     } catch (e) {
-      print("Lỗi fetchAllAdminData: $e");
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      debugPrint("AdminProvider Error: $e");
     }
-  }
 
-  // ==========================================
-  // 2. QUẢN LÝ TÀI KHOẢN (USER)
-  // ==========================================
-  Future<bool> toggleUser(String token, int userId, int index) async {
-    final success = await _adminService.toggleUserStatus(token, userId);
-    if (success) {
-      // Đảo ngược trạng thái hoạt động cục bộ để UI cập nhật ngay lập tức
-      _users[index]['is_active'] = !_users[index]['is_active'];
-      notifyListeners();
-      return true;
-    }
-    return false;
-  }
-
-  // ==========================================
-  // 3. QUẢN LÝ GIÁO TRÌNH / CÔNG THỨC (FORMULA CRUD)
-  // ==========================================
-
-  // Thêm mới công thức toán
-  Future<bool> addFormula(String token, Map<String, dynamic> formulaData) async {
-    final success = await _adminService.createFormula(token, formulaData);
-    if (success) {
-      // Tải lại danh sách công thức để cập nhật dữ liệu mới nhất
-      _formulas = await _adminService.getAllFormulas(token) ?? [];
-
-      // Cập nhật lại số lượng trong ô thống kê Dashboard (nếu có)
-      if (_stats != null && _stats!['overview'] != null) {
-        _stats!['overview']['total_formulas_in_curriculum'] =
-            (_stats!['overview']['total_formulas_in_curriculum'] ?? 0) + 1;
-      }
-      notifyListeners();
-      return true;
-    }
-    return false;
-  }
-
-  // Chỉnh sửa công thức toán
-  Future<bool> editFormula(String token, int formulaId, int index, Map<String, dynamic> formulaData) async {
-    final success = await _adminService.updateFormula(token, formulaId, formulaData);
-    if (success) {
-      // Cập nhật trực tiếp vào item trong mảng State cục bộ để tránh re-fetch lãng phí dữ liệu
-      _formulas[index]['grade'] = formulaData['grade'];
-      _formulas[index]['title'] = formulaData['title'];
-      _formulas[index]['formula'] = formulaData['formula'];
-      _formulas[index]['explanation'] = formulaData['explanation'];
-      _formulas[index]['example'] = formulaData['example'];
-      _formulas[index]['category'] = formulaData['category'];
-      notifyListeners();
-      return true;
-    }
-    return false;
-  }
-
-  // Xóa công thức toán khỏi giáo trình
-  Future<bool> removeFormula(String token, int formulaId, int index) async {
-    final success = await _adminService.deleteFormula(token, formulaId);
-    if (success) {
-      // Xóa phần tử khỏi danh sách cục bộ ngay lập tức
-      _formulas.removeAt(index);
-
-      // Giảm số lượng trong ô thống kê Dashboard
-      if (_stats != null && _stats!['overview'] != null) {
-        _stats!['overview']['total_formulas_in_curriculum'] =
-            (_stats!['overview']['total_formulas_in_curriculum'] ?? 0) - 1;
-      }
-      notifyListeners();
-      return true;
-    }
-    return false;
-  }
-
-  // Hàm tải riêng danh sách công thức khi cần lọc theo Khối lớp (Toán 6 -> Toán 9)
-  Future<void> filterFormulasByGrade(String token, int? grade) async {
-    _isLoading = true;
-    notifyListeners();
-    _formulas = await _adminService.getAllFormulas(token, grade: grade) ?? [];
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<bool> toggleUser(String token, int userId, int index) async {
+    final success = await _adminService.toggleUserStatus(token, userId);
+
+    if (success) {
+      _users[index]['is_active'] = !_users[index]['is_active'];
+
+      notifyListeners();
+    }
+
+    return success;
+  }
+
+  Future<void> loadGrades(String token) async {
+    _isLoading = true;
+    notifyListeners();
+
+    _grades = await _adminService.getGrades(token) ?? [];
+
+    print("GRADES = $_grades");
+
+    _chapters.clear();
+    _lessons.clear();
+
+    _selectedGradeId = null;
+    _selectedChapterId = null;
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> selectGrade(String token, int gradeId) async {
+    _selectedGradeId = gradeId;
+
+    await loadChapters(token, gradeId);
+  }
+
+  Future<void> loadChapters(String token, int gradeId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    _chapters = await _adminService.getChapters(token, gradeId) ?? [];
+
+    print("CHAPTERS = $_chapters");
+
+    _lessons.clear();
+
+    _selectedChapterId = null;
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> selectChapter(String token, int chapterId) async {
+    _selectedChapterId = chapterId;
+
+    await loadLessons(token, chapterId);
+  }
+
+  Future<void> loadLessons(String token, int chapterId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    _lessons = await _adminService.getLessons(token, chapterId) ?? [];
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> refreshLessons(String token) async {
+    if (_selectedChapterId == null) {
+      return;
+    }
+
+    await loadLessons(token, _selectedChapterId!);
+  }
+
+  Future<bool> addLesson(String token, Map<String, dynamic> data) async {
+    final success = await _adminService.createLesson(token, data);
+
+    if (success) {
+      await loadLessons(token, data['chapter_id']);
+    }
+
+    return success;
+  }
+
+  Future<bool> editLesson(
+    String token,
+    int lessonId,
+    Map<String, dynamic> data,
+  ) async {
+    final success = await _adminService.updateLesson(token, lessonId, data);
+
+    if (success) {
+      await loadLessons(token, data['chapter_id']);
+    }
+
+    return success;
+  }
+
+  Future<bool> removeLesson(String token, int lessonId, int chapterId) async {
+    final success = await _adminService.deleteLesson(token, lessonId);
+
+    if (success) {
+      await loadLessons(token, chapterId);
+    }
+
+    return success;
   }
 }

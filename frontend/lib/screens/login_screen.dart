@@ -12,7 +12,7 @@ import 'forgotpw_screen.dart';
 import 'profile_screen.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
-import 'admin/admin_dashboard_screen.dart'; // 🚀 BỔ SUNG: Import màn hình Admin của bạn vào đây
+import 'admin/admin_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -69,30 +69,23 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       await prefs.setString('token', token);
 
       if (mounted) {
-        // Hàm này sẽ nạp thông tin User vào State của AuthProvider
         await context.read<AuthProvider>().loadUser();
       }
 
       if (!mounted) return;
       setState(() => _loading = false);
 
-      // 🚀 BỔ SUNG: LẤY THÔNG TIN ROLE TỪ AUTH_PROVIDER ĐỂ ĐIỀU HƯỚNG
       final authProvider = context.read<AuthProvider>();
 
-      // Thầy giả định trong AuthProvider của em model user có thuộc tính 'role' hoặc getter 'role'.
-      // Nếu file auth_provider.dart của em viết hoa thường hoặc cấu trúc khác (ví dụ: authProvider.user.role), hãy chỉnh lại cho khớp nhé!
       final String userRole = authProvider.user?.role ?? 'USER';
 
-      print("DEBUG 🔍: Quyền hạn đăng nhập của tài khoản này là -> $userRole");
 
       if (userRole == 'ADMIN') {
-        // Nếu là ADMIN -> Chuyển sang màn hình quản trị vừa băm tách
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => AdminDashboardScreen(token: token)),
         );
       } else {
-        // Nếu là học sinh (USER) -> Vào trang giải toán học sinh như cũ
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -106,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       String friendlyMessage = 'Đã có lỗi xảy ra. Vui lòng thử lại';
 
       if (rawError.contains('value is not a valid email address')) {
-        friendlyMessage = 'Email không đúng định dạng (thiếu dấu chấm hoặc sai ký tự)';
+        friendlyMessage = 'Email không đúng định dạng';
       } else if (rawError.contains('not_found') || rawError.contains('401')) {
         friendlyMessage = 'Email hoặc mật khẩu không chính xác';
       } else if (rawError.contains('Connection refused')) {
@@ -155,7 +148,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
       if (!mounted) return;
 
-      // 🚀 BỔ SUNG ĐIỀU HƯỚNG CHO GOOGLE LOGIN (Nếu tài khoản Google đó có quyền ADMIN)
       final authProvider = context.read<AuthProvider>();
       if (authProvider.user?.role == 'ADMIN') {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => AdminDashboardScreen(token: accessToken)));

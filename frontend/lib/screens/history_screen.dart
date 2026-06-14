@@ -109,7 +109,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         children: [
           Icon(Icons.history_rounded, size: 64, color: Colors.grey.shade300),
           const SizedBox(height: 16),
-          Text("Chưa có lịch sử giải bài", style: TextStyle(color: Colors.grey.shade500)),
+          Text("Bạn chưa có lịch sử giải bài. Hãy bắt đầu giải bài tập ngay!", style: TextStyle(color: Colors.grey.shade500)),
         ],
       ),
     );
@@ -311,13 +311,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ],
               ),
 
-              // Đường phân cách mỏng
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
                 child: Divider(height: 1, thickness: 0.5),
               ),
 
-              // Hàng thông tin phụ bên dưới
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

@@ -16,7 +16,6 @@ class _AdminHistoriesScreenState extends State<AdminHistoriesScreen> {
   String _searchQuery = '';
   final TextEditingController _searchCtrl = TextEditingController();
 
-  // Hàm định dạng ngày giờ hiển thị dạng DD/MM/YYYY HH:mm từ chuỗi ISO của Backend
   String _formatDateTime(dynamic createdAt) {
     if (createdAt == null) return 'Vừa xong';
     try {
@@ -36,11 +35,9 @@ class _AdminHistoriesScreenState extends State<AdminHistoriesScreen> {
     final adminProv = Provider.of<AdminProvider>(context);
     final List<dynamic> rawHistories = adminProv.histories;
 
-    // Đọc số liệu tổng quan từ API thống kê để đổ lên 3 thẻ đầu trang
     final overview = adminProv.stats?['overview'] ?? {};
     final aiPerf = adminProv.stats?['ai_engine_performance'] ?? {};
 
-    // Bộ lọc tìm kiếm theo tên học sinh hoặc nội dung đề toán
     List<dynamic> filteredHistories = rawHistories.where((h) {
       final userObj = h['user'] != null ? Map<String, dynamic>.from(h['user']) : null;
       final probObj = h['problem'] != null ? Map<String, dynamic>.from(h['problem']) : null;
@@ -55,9 +52,6 @@ class _AdminHistoriesScreenState extends State<AdminHistoriesScreen> {
       backgroundColor: const Color(0xFFF8FAFC),
       body: Column(
         children: [
-          // ==========================================
-          // 1. HEADER GRADIENT ĐỒNG BỘ THIẾT KẾ CAO CẤP
-          // ==========================================
           Container(
             width: double.infinity,
             padding: const EdgeInsets.only(top: 56, left: 20, right: 20, bottom: 28),
@@ -104,36 +98,21 @@ class _AdminHistoriesScreenState extends State<AdminHistoriesScreen> {
             ),
           ),
 
-          // PHẦN THÂN TRANG CHỨA NỘI DUNG CUỘN
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ==========================================
-                  // 2. HÀNG 3 THẺ SỐ LIỆU THỐNG KÊ (Tổng giải, Tokens, TB bước)
-                  // ==========================================
                   Row(
                     children: [
                       Expanded(
                         child: _buildStatCard('Tổng lượt giải', '${overview['total_problems_submitted'] ?? rawHistories.length}', Icons.bar_chart_rounded, const Color(0xFF6366F1)),
                       ),
                       const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildStatCard('Tổng tokens', '${(aiPerf['total_tokens_used'] ?? 0) > 1000 ? ((aiPerf['total_tokens_used'] ?? 0) / 1000).toStringAsFixed(1) + 'K' : (aiPerf['total_tokens_used'] ?? 0)}', Icons.toll_rounded, const Color(0xFF10B981)),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildStatCard('TB bước/bài', '5.0', Icons.pie_chart_outline_rounded, const Color(0xFF0EA5E9)),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 24),
-
-                  // ==========================================
-                  // 3. Ô TÌM KIẾM THÔNG MINH CHUẨN UI
-                  // ==========================================
                   TextField(
                     controller: _searchCtrl,
                     onChanged: (value) {
@@ -142,7 +121,7 @@ class _AdminHistoriesScreenState extends State<AdminHistoriesScreen> {
                       });
                     },
                     decoration: InputDecoration(
-                      hintText: 'Tìm phương trình hoặc user..',
+                      hintText: 'Tìm người dùng hoặc bài giải.....',
                       hintStyle: GoogleFonts.dmSans(color: const Color(0xFF94A3B8), fontSize: 14),
                       prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF94A3B8), size: 20),
                       filled: true,
@@ -163,12 +142,8 @@ class _AdminHistoriesScreenState extends State<AdminHistoriesScreen> {
                     ),
                   ),
 
-                  // 🔥 ĐÃ BỎ TOÀN BỘ THANH CHIPS BẬC 1, BẬC 2 THEO YÊU CẦU CỦA EM
                   const SizedBox(height: 16),
 
-                  // ==========================================
-                  // 4. DANH SÁCH THẺ LỊCH SỬ GIẢI BÀI CHI TIẾT
-                  // ==========================================
                   filteredHistories.isEmpty
                       ? Center(
                     child: Padding(
@@ -177,7 +152,7 @@ class _AdminHistoriesScreenState extends State<AdminHistoriesScreen> {
                     ),
                   )
                       : ListView.builder(
-                    padding: EdgeInsets.zero, // Xóa hoàn toàn padding thừa chống khoảng trống lớn
+                    padding: EdgeInsets.zero,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: filteredHistories.length,

@@ -1,4 +1,3 @@
-// main.dart
 import 'package:algebra_chatbot/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -6,10 +5,10 @@ import 'providers/chat_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/history_provider.dart';
-import 'providers/formula_provider.dart';
 import '../core/theme/app_theme.dart';
 import 'providers/navigation_provider.dart';
 import 'providers/solver_provider.dart';
+import 'providers/curriculum_provider.dart';
 import 'providers/admin_provider.dart';
 
 void main() {
@@ -20,11 +19,11 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => FormulaProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => HistoryProvider()),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => SolverProvider()),
+        ChangeNotifierProvider(create: (_) => CurriculumProvider()),
         ChangeNotifierProvider(create: (_) => AdminProvider()),
       ],
       child: const MyApp(),
