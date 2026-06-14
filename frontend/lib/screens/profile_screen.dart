@@ -141,13 +141,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ================= 1. HEADER =================
   Widget _buildPremiumHeader(BuildContext context, String name, String email) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.only(top: 70, bottom: 60, left: 24, right: 24),
       decoration: const BoxDecoration(
-        color: AppColors.primary, // Cố định màu chuẩn của App
+        color: AppColors.primary,
       ),
       child: Row(
         children: [
@@ -199,7 +198,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ================= 2. COMPONENTS (ĐÃ FIX OVERFLOW) =================
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 8, bottom: 12),
@@ -321,143 +319,171 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ================= 3. MODALS =================
   void _showCustomModal(BuildContext context, AuthProvider auth, String type) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final nameCtrl = TextEditingController(text: auth.user?.name);
     final oldPassCtrl = TextEditingController();
     final newPassCtrl = TextEditingController();
-    final confirmPassCtrl = TextEditingController(); // Thêm ô xác nhận mật khẩu
+    final confirmPassCtrl = TextEditingController();
+
+    String errorMessage = '';
 
     showDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.4),
-      builder: (ctx) => Dialog(
-        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: type == 'logout' ? const Color(0xFFFEF2F2) : AppColors.primary.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  type == 'edit_name' ? Icons.person_outline : type == 'change_password' ? Icons.lock_outline : Icons.logout_rounded,
-                  color: type == 'logout' ? const Color(0xFFEF4444) : AppColors.primary,
-                  size: 32,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                type == 'edit_name' ? 'Chỉnh sửa tên' : type == 'change_password' ? 'Đổi mật khẩu' : 'Xác nhận đăng xuất',
-                style: GoogleFonts.dmSans(fontSize: 20, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                type == 'edit_name' ? 'Tên này sẽ hiển thị trên trang cá nhân của bạn.'
-                    : type == 'change_password' ? 'Mật khẩu mới phải có ít nhất 6 ký tự.'
-                    : 'Bạn sẽ cần đăng nhập lại để tiếp tục sử dụng.',
-                style: const TextStyle(color: Colors.grey, fontSize: 14),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-
-              // UI: Các trường nhập liệu
-              if (type == 'edit_name')
-                _buildModernInput(ctx, nameCtrl, 'Họ và tên', Icons.badge_outlined, false),
-              if (type == 'change_password') ...[
-                _buildModernInput(ctx, oldPassCtrl, 'Mật khẩu hiện tại', Icons.password_rounded, true),
-                const SizedBox(height: 12),
-                _buildModernInput(ctx, newPassCtrl, 'Mật khẩu mới', Icons.lock_reset_rounded, true),
-                const SizedBox(height: 12),
-                _buildModernInput(ctx, confirmPassCtrl, 'Xác nhận mật khẩu mới', Icons.lock_outline, true),
-              ],
-
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: type == 'logout' ? const Color(0xFFEF4444) : AppColors.primary,
-                    // CHUYỂN STYLE VÀO ĐÂY:
-                    foregroundColor: Colors.white,
-                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 0,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return Dialog(
+            backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+            surfaceTintColor: Colors.transparent,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: type == 'logout' ? const Color(0xFFFEF2F2) : AppColors.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      type == 'edit_name' ? Icons.person_outline : type == 'change_password' ? Icons.lock_outline : Icons.logout_rounded,
+                      color: type == 'logout' ? const Color(0xFFEF4444) : AppColors.primary,
+                      size: 32,
+                    ),
                   ),
-                  onPressed: () async {
-                    if (type == 'edit_name') {
-                      if (nameCtrl.text.trim().isEmpty) {
-                        _showErrorToast(context, 'Tên không được để trống!');
-                        return;
-                      }
-                      await auth.updateProfile(name: nameCtrl.text.trim(), email: '');
-                      if (mounted) Navigator.pop(ctx);
-                    }
-                    else if (type == 'change_password') {
-                      final oldPass = oldPassCtrl.text;
-                      final newPass = newPassCtrl.text;
-                      final confirmPass = confirmPassCtrl.text;
-
-                      if (oldPass.isEmpty || newPass.isEmpty || confirmPass.isEmpty) {
-                        _showErrorToast(context, 'Vui lòng điền đầy đủ các trường!');
-                        return;
-                      }
-                      if (newPass.length < 6) {
-                        _showErrorToast(context, 'Mật khẩu mới phải có ít nhất 6 ký tự!');
-                        return;
-                      }
-                      if (oldPass == newPass) {
-                        _showErrorToast(context, 'Mật khẩu mới không được giống mật khẩu cũ!');
-                        return;
-                      }
-                      if (newPass != confirmPass) {
-                        _showErrorToast(context, 'Mật khẩu xác nhận không khớp!');
-                        return;
-                      }
-
-                      final success = await auth.changePassword(oldPassword: oldPass, newPassword: newPass);
-                      if (success && mounted) {
-                        Navigator.pop(ctx);
-                        _showSuccessToast(context, 'Đổi mật khẩu thành công!');
-                      }
-                    }
-                    else if (type == 'logout') {
-                      await auth.logout();
-                      if (mounted) Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const LoginScreen()), (_) => false);
-                    }
-                  },
-                  // THẺ TEXT XÓA BỎ STYLE BÊN TRONG:
-                  child: Text(type == 'logout' ? 'Đăng xuất ngay' : 'Lưu thay đổi'),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    // CHUYỂN STYLE VÀO ĐÂY:
-                      foregroundColor: Colors.grey,
-                      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
+                  const SizedBox(height: 20),
+                  Text(
+                    type == 'edit_name' ? 'Chỉnh sửa tên' : type == 'change_password' ? 'Đổi mật khẩu' : 'Xác nhận đăng xuất',
+                    style: GoogleFonts.dmSans(fontSize: 20, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
                   ),
-                  onPressed: () => Navigator.pop(ctx),
-                  // THẺ TEXT XÓA BỎ STYLE BÊN TRONG:
-                  child: const Text('Hủy bỏ'),
-                ),
+                  const SizedBox(height: 8),
+                  Text(
+                    type == 'edit_name' ? 'Tên này sẽ hiển thị trên trang cá nhân của bạn.'
+                        : type == 'change_password' ? 'Mật khẩu mới phải có ít nhất 6 ký tự.'
+                        : 'Bạn có chắc chắn muốn đăng xuất?',
+                    style: const TextStyle(color: Colors.grey, fontSize: 14),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+
+                  if (type == 'edit_name')
+                    _buildModernInput(ctx, nameCtrl, 'Họ và tên', Icons.badge_outlined, false),
+                  if (type == 'change_password') ...[
+                    _buildModernInput(ctx, oldPassCtrl, 'Mật khẩu hiện tại', Icons.password_rounded, true),
+                    const SizedBox(height: 12),
+                    _buildModernInput(ctx, newPassCtrl, 'Mật khẩu mới', Icons.lock_reset_rounded, true),
+                    const SizedBox(height: 12),
+                    _buildModernInput(ctx, confirmPassCtrl, 'Xác nhận mật khẩu mới', Icons.lock_outline, true),
+                  ],
+
+                  const SizedBox(height: 20),
+
+                  if (errorMessage.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF2F2),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFFCA5A5)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444), size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              errorMessage,
+                              style: const TextStyle(color: Color(0xFFB91C1C), fontSize: 13, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: type == 'logout' ? const Color(0xFFEF4444) : AppColors.primary,
+                        foregroundColor: Colors.white,
+                        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 0,
+                      ),
+                      onPressed: () async {
+                        setModalState(() => errorMessage = '');
+
+                        if (type == 'edit_name') {
+                          if (nameCtrl.text.trim().isEmpty) {
+                            setModalState(() => errorMessage = 'Tên không được để trống!');
+                            return;
+                          }
+                          await auth.updateProfile(name: nameCtrl.text.trim(), email: '');
+                          if (mounted) Navigator.pop(ctx);
+                        }
+                        else if (type == 'change_password') {
+                          final oldPass = oldPassCtrl.text;
+                          final newPass = newPassCtrl.text;
+                          final confirmPass = confirmPassCtrl.text;
+
+                          if (oldPass.isEmpty || newPass.isEmpty || confirmPass.isEmpty) {
+                            setModalState(() => errorMessage = 'Vui lòng điền đầy đủ các trường!');
+                            return;
+                          }
+                          if (newPass.length < 6) {
+                            setModalState(() => errorMessage = 'Mật khẩu mới phải có ít nhất 6 ký tự!');
+                            return;
+                          }
+                          if (oldPass == newPass) {
+                            setModalState(() => errorMessage = 'Mật khẩu mới không được giống mật khẩu cũ!');
+                            return;
+                          }
+                          if (newPass != confirmPass) {
+                            setModalState(() => errorMessage = 'Mật khẩu xác nhận không khớp!');
+                            return;
+                          }
+
+                          final success = await auth.changePassword(oldPassword: oldPass, newPassword: newPass);
+                          if (success && mounted) {
+                            Navigator.pop(ctx);
+                            _showSuccessToast(context, 'Đổi mật khẩu thành công!');
+                          } else {
+                            setModalState(() => errorMessage = 'Mật khẩu cũ không chính xác!');
+                          }
+                        }
+                        else if (type == 'logout') {
+                          await auth.logout();
+                          if (mounted) Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const LoginScreen()), (_) => false);
+                        }
+                      },
+                      child: Text(type == 'logout' ? 'Đăng xuất ngay' : 'Lưu thay đổi'),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                          foregroundColor: Colors.grey,
+                          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
+                      ),
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Hủy bỏ'),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -472,11 +498,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Expanded(child: Text(message))
             ]
         ),
-        backgroundColor: const Color(0xFFEF4444), // Màu đỏ cảnh báo
+        backgroundColor: const Color(0xFFEF4444),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(20),
-        duration: const Duration(seconds: 3), // Tự động ẩn sau 3 giây
+        duration: const Duration(seconds: 3),
       ),
     );
   }

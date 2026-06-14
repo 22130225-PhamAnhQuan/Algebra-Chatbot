@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
-import '../services/api_service.dart';
-import '../services/auth_service.dart';
 import '../services/user_service.dart';
 
 class AuthProvider with ChangeNotifier {
@@ -37,7 +35,6 @@ class AuthProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
-    print("DANH TÍNH USER ĐĂNG NHẬP: ID=${_user!.id} - Email=${_user!.email} - Quyền=${_user!.role}");
   }
 
   // 2. Cập nhật hồ sơ (Hàm mà dòng 191 báo thiếu)

@@ -1,15 +1,15 @@
 class SolutionModel {
+  final int? problemId;
   final String result;
   final List<StepModel> steps;
   final String latex;
-
-  // GRAPH SUPPORT
   final String? image;
   final String? solver;
   final String? type;
   final Map<String, dynamic>? features;
 
   SolutionModel({
+    this.problemId,
     required this.result,
     required this.steps,
     required this.latex,
@@ -20,74 +20,65 @@ class SolutionModel {
   });
 
   factory SolutionModel.fromJson(Map<String, dynamic> json) {
+    // Bóc tách lớp bọc dữ liệu từ API Backend
     final data = json['data'] ?? json['solution'] ?? json;
 
-    final rawSteps = data['steps'];
+    // Ưu tiên đọc mảng công thức xịn "steps_latex" trước, nếu rỗng thì fallback về "steps"
+    final rawSteps = data['steps_latex'] ?? data['steps'];
 
     List<StepModel> parsedSteps = [];
+
     if (rawSteps is List) {
       parsedSteps = rawSteps.asMap().entries.map((entry) {
         final index = entry.key;
         final s = entry.value;
 
-        // STEP JSON
         if (s is Map<String, dynamic>) {
           return StepModel.fromJson(s);
         }
 
-        // STEP STRING
         return StepModel(
           stepNumber: index + 1,
-          description: s.toString(),
-          latex: '',
+          description: '',
+          latex: s.toString(),
         );
       }).toList();
     }
-
-    // =========================
-    // STRING STEPS
-    // =========================
     else if (rawSteps is String) {
       parsedSteps = rawSteps
           .split('\n')
           .where((e) => e.trim().isNotEmpty)
-          .map((s) => StepModel(
-        stepNumber: 0,
-        description: s.trim(),
+          .toList()
+          .asMap()
+          .entries
+          .map((entry) => StepModel(
+        stepNumber: entry.key + 1,
+        description: entry.value.trim(),
         latex: '',
       ))
           .toList();
     }
 
     return SolutionModel(
+      problemId: json['problem_id'] is int ? json['problem_id'] : null,
       result: data['result']?.toString() ?? "",
       steps: parsedSteps,
       latex: data['latex']?.toString() ?? "",
 
-      // GRAPH
-      image: data['image']?.toString(),
+      image: data['graph_image']?.toString() ?? data['image']?.toString(),
+
       solver: data['solver']?.toString(),
       type: data['type']?.toString(),
-
-      // FEATURES
-      features: data['features'] is Map<String, dynamic>
-          ? data['features']
-          : null,
+      features: data['features'] is Map<String, dynamic> ? data['features'] : null,
     );
   }
 
-  // =========================
-  // HELPERS
-  // =========================
-
   bool get isGraph {
-    return solver != null &&
-        solver!.startsWith("graph");
+    return hasImage;
   }
 
   bool get hasImage {
-    return image != null &&
-        image!.isNotEmpty;
+    return image != null && image!.isNotEmpty;
   }
 }
 

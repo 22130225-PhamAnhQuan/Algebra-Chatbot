@@ -46,7 +46,6 @@ class _AdminAILogsScreenState extends State<AdminAILogsScreen> {
     int totalLatency = 0;
     int totalTokens = 0;
     int geminiProCount = 0;
-    int geminiFlashCount = 0;
 
     for (var log in rawLogs) {
       totalLatency += (log['latency_ms'] as num? ?? 0).toInt();
@@ -56,8 +55,6 @@ class _AdminAILogsScreenState extends State<AdminAILogsScreen> {
       String modelType = (log['model'] ?? '').toString().toLowerCase();
       if (modelType.contains('pro')) {
         geminiProCount++;
-      } else {
-        geminiFlashCount++;
       }
     }
     int avgLatency = totalCalls > 0 ? (totalLatency ~/ totalCalls) : 0;
@@ -107,7 +104,7 @@ class _AdminAILogsScreenState extends State<AdminAILogsScreen> {
                   children: [
                     Text('Quản lý AI Logs', style: GoogleFonts.dmSans(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
                     const SizedBox(height: 2),
-                    Text('Lịch sử gọi Gemini API từ Database', style: GoogleFonts.dmSans(fontSize: 12, color: Colors.white70)),
+                    Text('AI Engine', style: GoogleFonts.dmSans(fontSize: 12, color: Colors.white70)),
                   ],
                 ),
               ],
@@ -151,9 +148,7 @@ class _AdminAILogsScreenState extends State<AdminAILogsScreen> {
                       children: [
                         Text('Model sử dụng', style: GoogleFonts.dmSans(fontSize: 15, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B))),
                         const SizedBox(height: 16),
-                        _buildModelProgress('gemini-1.5-pro', geminiProCount, totalCalls),
-                        const SizedBox(height: 14),
-                        _buildModelProgress('gemini-1.5-flash', geminiFlashCount, totalCalls),
+                        _buildModelProgress('Phi3-mini', geminiProCount, totalCalls)
                       ],
                     ),
                   ),

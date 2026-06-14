@@ -13,11 +13,7 @@ class ChatScreen extends StatefulWidget {
   final String problem;
   final SolutionModel? initialSolution;
 
-  const ChatScreen({
-    super.key,
-    required this.problem,
-    this.initialSolution,
-  });
+  const ChatScreen({super.key, required this.problem, this.initialSolution});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -40,10 +36,7 @@ class GraphImage extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Image.memory(
-          bytes,
-          fit: BoxFit.contain,
-        ),
+        child: Image.memory(bytes, fit: BoxFit.contain),
       ),
     );
   }
@@ -56,14 +49,11 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    // Khởi tạo dữ liệu ngay khi vào màn hình
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = Provider.of<ChatProvider>(context, listen: false);
       if (widget.initialSolution != null) {
-        // Ưu tiên dùng kết quả có sẵn từ màn hình trước
         provider.setInitialSolution(widget.problem, widget.initialSolution!);
       } else {
-        // Nếu không có (ví dụ vào từ lịch sử) thì mới giải lại
         provider.solveProblem(widget.problem);
       }
     });
@@ -99,12 +89,15 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: Consumer<ChatProvider>(
               builder: (context, provider, child) {
-                WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => _scrollToBottom(),
+                );
 
                 return ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.all(16),
-                  itemCount: provider.messages.length + (provider.isSending ? 1 : 0),
+                  itemCount:
+                      provider.messages.length + (provider.isSending ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index == provider.messages.length) {
                       return _buildLoadingState(isDark);
@@ -112,11 +105,26 @@ class _ChatScreenState extends State<ChatScreen> {
 
                     final msg = provider.messages[index];
                     if (msg.sender == 'USER') {
-                      return _buildUserBubble(msg.content, isDark, imageUrl: msg.imageUrl);
+                      return _buildUserBubble(
+                        msg.content,
+                        isDark,
+                        imageUrl: msg.imageUrl,
+                      );
                     } else {
-                      // Logic: Tin nhắn BOT ở index 1 thường chứa lời giải chi tiết
-                      bool showSolution = (index == 1 && provider.solutionData != null);
-                      return _buildBotBubble(msg.content, isDark, isSolution: showSolution);
+                      bool showSolution =
+                          (index == 1 ||
+                              (index ==
+                                  provider.messages.indexOf(
+                                    provider.messages.firstWhere(
+                                      (m) => m.sender == 'BOT',
+                                    ),
+                                  ))) &&
+                          provider.solutionData != null;
+                      return _buildBotBubble(
+                        msg.content,
+                        isDark,
+                        isSolution: showSolution,
+                      );
                     }
                   },
                 );
@@ -129,13 +137,15 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  // ================= 1. APP BAR =================
   PreferredSizeWidget _buildAppBar(BuildContext context, bool isDark) {
     return AppBar(
       backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
       elevation: 0.5,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black87),
+        icon: Icon(
+          Icons.arrow_back,
+          color: isDark ? Colors.white : Colors.black87,
+        ),
         onPressed: () => Navigator.pop(context, true),
       ),
       title: Row(
@@ -159,7 +169,6 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  // ================= 2. BONG BÓNG CHAT =================
   Widget _buildUserBubble(String text, bool isDark, {String? imageUrl}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
@@ -168,7 +177,6 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // Nếu có ảnh thì hiện ảnh lên trước bubble chữ
             if (imageUrl != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
@@ -178,8 +186,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     "${ApiConfig.baseUrl}$imageUrl",
                     width: MediaQuery.of(context).size.width * 0.6,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.broken_image, color: Colors.grey, size: 50),
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.broken_image,
+                      color: Colors.grey,
+                      size: 50,
+                    ),
                   ),
                 ),
               ),
@@ -187,9 +198,13 @@ class _ChatScreenState extends State<ChatScreen> {
             // Bubble chứa nội dung text (đề bài)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.75,
+              ),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.primary.withOpacity(0.2) : const Color(0xFFF3E9FF),
+                color: isDark
+                    ? AppColors.primary.withOpacity(0.2)
+                    : const Color(0xFFF3E9FF),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(15),
                   bottomLeft: Radius.circular(15),
@@ -211,7 +226,11 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildBotBubble(String content, bool isDark, {bool isSolution = false}) {
+  Widget _buildBotBubble(
+    String content,
+    bool isDark, {
+    bool isSolution = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Row(
@@ -234,10 +253,17 @@ class _ChatScreenState extends State<ChatScreen> {
                   bottomRight: Radius.circular(20),
                 ),
                 boxShadow: [
-                  if (!isDark) BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))
+                  if (!isDark)
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
                 ],
               ),
-              child: isSolution ? _buildSolutionContent(isDark) : _buildSimpleText(content, isDark),
+              child: isSolution
+                  ? _buildSolutionContent(isDark)
+                  : _buildSimpleText(content, isDark),
             ),
           ),
         ],
@@ -245,35 +271,45 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  // ================= 3. NỘI DUNG LỜI GIẢI =================
   Widget _buildSimpleText(String text, bool isDark) {
     return Math.tex(
       text,
-      textStyle: TextStyle(fontSize: 15, color: isDark ? Colors.white : Colors.black87, height: 1.4),
-      onErrorFallback: (err) => Text(text, style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
+      textStyle: TextStyle(
+        fontSize: 15,
+        color: isDark ? Colors.white : Colors.black87,
+        height: 1.4,
+      ),
+      onErrorFallback: (err) => Text(
+        text,
+        style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+      ),
     );
   }
 
   Widget _buildSolutionContent(bool isDark) {
     final provider = Provider.of<ChatProvider>(context);
     final data = provider.solutionData;
+
     if (data == null) return const Text("Đang tải lời giải...");
 
     if (data.isGraph) {
       return _buildGraphSolution(data, isDark);
     }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 1. Lời dẫn thân thiện (Giống ảnh 2)
-        Text(
-          "Tôi sẽ giải phương trình: **${widget.problem}** cho bạn nhé! Đây là lời giải chi tiết từng bước:",
-          style: TextStyle(
-            color: isDark
-                ? AppColors.textPrimaryDark
-                : AppColors.textPrimary,
-            fontSize: 15,
-            height: 1.4,
+        RichText(
+          text: TextSpan(
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 15, height: 1.4),
+            children: [
+              const TextSpan(text: "Tôi sẽ giải: "),
+              TextSpan(
+                text: widget.problem,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, color: AppColors.primary),
+              ),
+              const TextSpan(text: " cho bạn nhé! Đây là lời giải chi tiết từng bước:"),
+            ],
           ),
         ),
         const SizedBox(height: 15),
@@ -294,42 +330,69 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 15),
         ],
 
-        const SizedBox(height: 15),
-
-        // 2. Khung "Giải từng bước"
+        // Khung "Giải từng bước"
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: isDark ? AppColors.surfaceDark : Colors.white,
-            borderRadius: BorderRadius.circular(20), // Bo góc mềm mại
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: Colors.grey.withOpacity(0.15)),
-            boxShadow: [
-              if (!isDark) BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))
-            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header của khung
+              // Header của khung giải toán
               Row(
                 children: [
                   const Icon(Icons.auto_awesome, color: AppColors.primary, size: 20),
                   const SizedBox(width: 8),
-                  const Text("Giải từng bước", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
+                  const Text(
+                    "Giải từng bước",
+                    style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
 
-              // Render danh sách các bước
-              if (data.steps.isNotEmpty)
-                for (int i = 0; i < data.steps.length; i++)
-                  _buildStepRow((i + 1).toString(), data.steps[i], isDark),
+              if (data.steps.isNotEmpty) ...[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: data.steps.expand<Widget>((step) {
+                    String stepText = step.latex.isNotEmpty ? step.latex : step.description;
+                    String cleanText = stepText.trim();
 
-              const SizedBox(height: 8),
+                    List<String> extractedLines = [];
 
-              // Bước cuối cùng: Nút xanh Kết quả (Giống bước 6 trong ảnh 2)
+                    // Trường hợp 1: Nếu Backend trả về chuỗi có dạng mảng JSON "[...]"
+                    if (cleanText.startsWith('[') && cleanText.endsWith(']')) {
+                      try {
+                        List<dynamic> parsedList = jsonDecode(cleanText);
+                        // Biến mảng thành danh sách chuỗi
+                        extractedLines = parsedList.map((item) => item.toString()).toList();
+                      } catch (e) {
+                        extractedLines = [cleanText];
+                      }
+                    } else {
+                      // Trường hợp 2: Nếu Backend gom chung thành 1 chuỗi dài có chứa dấu xuống dòng \n (như giải PT bậc 2)
+                      extractedLines = cleanText.split('\n');
+                    }
+
+                    // Lọc bỏ các dòng trống và vẽ từng Widget lên màn hình
+                    return extractedLines
+                        .where((line) => line.trim().isNotEmpty)
+                        .map((line) => _buildStepRow(line.trim(), isDark))
+                        .toList();
+
+                  }).toList(),
+                )
+              ] else
+                const Text("Không có bước giải"),
+
+              const SizedBox(height: 12),
+
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -337,16 +400,36 @@ class _ChatScreenState extends State<ChatScreen> {
                     margin: const EdgeInsets.only(top: 2),
                     decoration: BoxDecoration(
                       color: AppColors.success,
-                      borderRadius: BorderRadius.circular(6), // Ô vuông nhỏ tích xanh
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     padding: const EdgeInsets.all(2),
                     child: const Icon(Icons.check, color: Colors.white, size: 14),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      "Kết quả: ${data.result}",
-                      style: const TextStyle(color: AppColors.success, fontWeight: FontWeight.bold, fontSize: 15),
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        const Text(
+                          "Kết quả: ",
+                          style: TextStyle(color: AppColors.success, fontWeight: FontWeight.bold, fontSize: 15),
+                        ),
+
+                        // Logic thông minh: Có ảnh thì báo xem ảnh, không có thì render công thức
+                        (data.image != null && data.image!.isNotEmpty)
+                            ? const Text(
+                          "Đồ thị như hình vẽ bên trên",
+                          style: TextStyle(color: AppColors.success, fontWeight: FontWeight.bold, fontSize: 15),
+                        )
+                            : Math.tex(
+                          data.result.replaceAll(r'$', '').trim(), // Xóa ký tự $ rác nếu có
+                          textStyle: const TextStyle(color: AppColors.success, fontWeight: FontWeight.bold, fontSize: 15),
+                          onErrorFallback: (err) => Text(
+                            data.result,
+                            style: const TextStyle(color: AppColors.success, fontWeight: FontWeight.bold, fontSize: 15),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -358,15 +441,10 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildGraphSolution(
-      SolutionModel data,
-      bool isDark,
-      ) {
-
+  Widget _buildGraphSolution(SolutionModel data, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         const Text(
           "📊 Đồ thị hàm số",
           style: TextStyle(
@@ -398,16 +476,12 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 CircleAvatar(
                   radius: 12,
                   backgroundColor: AppColors.primary,
                   child: Text(
                     "${step.stepNumber}",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 11),
                   ),
                 ),
 
@@ -419,9 +493,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       height: 1.5,
-                      color: isDark
-                          ? Colors.white70
-                          : Colors.black87,
+                      color: isDark ? Colors.white70 : Colors.black87,
                     ),
                   ),
                 ),
@@ -451,95 +523,15 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildStepRow(String num, dynamic stepData, bool isDark) {
-    String description = "";
-    String latexStr = "";
-
-    // ================= 1. BÓC TÁCH DỮ LIỆU (SMART PARSER) =================
-    // Nếu bị lỗi Model ép thành String: "{step_number: 1, description: ..., latex: ...}"
-    if (stepData is String) {
-      // Dùng Regex để tự động gắp chữ ra khỏi chuỗi lỗi
-      final descMatch = RegExp(r'description:\s*(.*?),\s*latex:').firstMatch(stepData);
-      final latexMatch = RegExp(r'latex:\s*(.*?)\}?$').firstMatch(stepData);
-
-      if (descMatch != null) description = descMatch.group(1)?.trim() ?? "";
-      if (latexMatch != null) latexStr = latexMatch.group(1)?.trim() ?? "";
-
-      // Fallback nếu Regex không tìm thấy
-      if (description.isEmpty && latexStr.isEmpty) description = stepData;
-    }
-    // Nếu là Map chuẩn (JSON gốc)
-    else if (stepData is Map) {
-      description = stepData['description']?.toString() ?? "";
-      latexStr = stepData['latex']?.toString() ?? "";
-    }
-    // Nếu là Object Model (StepModel)
-    else {
-      try {
-        description = stepData.description ?? "";
-        latexStr = stepData.latex ?? "";
-      } catch (e) {
-        description = stepData.toString();
-      }
-    }
-
-    // ================= 2. LÀM SẠCH LATEX CHO FLUTTER MATH =================
-    latexStr = latexStr.replaceAll(r'\begin{align*}', '')
-        .replaceAll(r'\end{align*}', '')
-        .replaceAll(r'\begin{align}', '')
-        .replaceAll(r'\end{align}', '')
-        .replaceAll(r'$', '')
-        .trim();
-
-    // ================= 3. RENDER GIAO DIỆN =================
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-              radius: 12,
-              backgroundColor: AppColors.primary,
-              child: Text(num, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold))
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (description.isNotEmpty)
-                  Text(
-                      description,
-                      style: TextStyle(fontSize: 15, color: isDark ? Colors.white70 : Colors.black87, height: 1.4)
-                  ),
-
-                if (latexStr.isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Math.tex(
-                      latexStr,
-                      textStyle: TextStyle(fontSize: 15, color: isDark ? Colors.white : Colors.black87),
-                      onErrorFallback: (err) => Text(latexStr, style: const TextStyle(color: Colors.red)),
-                    ),
-                  ),
-                ]
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ================= 4. NHẬP LIỆU & LOADING =================
   Widget _buildChatInput(bool isDark) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 35),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
+        ],
       ),
       child: Row(
         children: [
@@ -549,11 +541,21 @@ class _ChatScreenState extends State<ChatScreen> {
               style: TextStyle(color: isDark ? Colors.white : Colors.black87),
               decoration: InputDecoration(
                 hintText: "Bạn chưa hiểu chỗ nào?",
-                hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38),
-                fillColor: isDark ? AppColors.inputBackgroundDark : const Color(0xFFF8F9FE),
+                hintStyle: TextStyle(
+                  color: isDark ? Colors.white38 : Colors.black38,
+                ),
+                fillColor: isDark
+                    ? AppColors.inputBackgroundDark
+                    : const Color(0xFFF8F9FE),
                 filled: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(25), borderSide: BorderSide.none),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: BorderSide.none,
+                ),
               ),
             ),
           ),
@@ -563,7 +565,11 @@ class _ChatScreenState extends State<ChatScreen> {
             child: CircleAvatar(
               backgroundColor: AppColors.primary,
               radius: 24,
-              child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.send_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
         ],
@@ -585,12 +591,98 @@ class _ChatScreenState extends State<ChatScreen> {
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 45),
       child: Row(
         children: [
-          const SizedBox(height: 12, width: 12, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)),
+          const SizedBox(
+            height: 12,
+            width: 12,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: AppColors.primary,
+            ),
+          ),
           const SizedBox(width: 12),
           Text(
-              "AI đang giải đáp...",
-              style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.grey, fontStyle: FontStyle.italic)
+            "AI đang giải đáp...",
+            style: TextStyle(
+              fontSize: 12,
+              color: isDark ? Colors.white54 : Colors.grey,
+              fontStyle: FontStyle.italic,
+            ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepRow(String rawLine, bool isDark) {
+    String cleanContent = rawLine
+        .replaceAll(r'\begin{align*}', '')
+        .replaceAll(r'\end{align*}', '')
+        .replaceAll(r'\begin{align}', '')
+        .replaceAll(r'\end{align}', '')
+        .replaceAll(r'$', '')
+        .trim();
+
+    if (cleanContent.isEmpty) return const SizedBox.shrink();
+
+    RegExp textRegex = RegExp(r'\\text\{([^}]+)\}');
+    String textDescription = "";
+
+    if (textRegex.hasMatch(cleanContent)) {
+      final match = textRegex.firstMatch(cleanContent);
+      textDescription = match?.group(1)?.trim() ?? "";
+      cleanContent = cleanContent.replaceAll(textRegex, '').trim();
+    }
+
+    bool isMath = cleanContent.contains(r'\') || // Bắt TẤT CẢ các lệnh LaTeX (\mathbb, \begin, \hline...)
+        cleanContent.contains('^') ||
+        cleanContent.contains('_') ||
+        cleanContent.contains('=') ||
+        cleanContent.contains('&') || // Bắt các cột trong bảng (Bảng giá trị)
+        cleanContent.contains('<') ||
+        cleanContent.contains('>');
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14), // Khoảng cách đều đặn giữa các dòng
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start, // Căn lề trái thẳng tắp
+        children: [
+          if (textDescription.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                textDescription,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+              ),
+            ),
+
+          // Hiển thị phần công thức toán học đi kèm
+          if (cleanContent.isNotEmpty && isMath)
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal, // Thanh cuộn ngang bảo vệ khi dòng toán quá dài
+              child: Math.tex(
+                cleanContent,
+                textStyle: TextStyle(
+                    fontSize: 15,
+                    color: isDark ? Colors.white : Colors.black87,
+                    height: 1.4
+                ),
+                onErrorFallback: (err) => Text(
+                  cleanContent,
+                  style: TextStyle(fontSize: 15, color: isDark ? Colors.white70 : Colors.black87),
+                ),
+              ),
+            )
+          else if (cleanContent.isNotEmpty)
+          // Nếu không phải toán mà là chuỗi chữ thường còn sót lại
+            Text(
+              cleanContent,
+              softWrap: true,
+              style: TextStyle(fontSize: 15, height: 1.4, color: isDark ? Colors.white70 : Colors.black87),
+            ),
         ],
       ),
     );

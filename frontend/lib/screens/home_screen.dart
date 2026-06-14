@@ -4,9 +4,9 @@ import 'package:provider/provider.dart';
 import '../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 import '../providers/history_provider.dart';
-import '../providers/navigation_provider.dart'; // Đảm bảo bạn đã tạo file này
-import 'solve_problem_screen.dart';
-import 'formula_screen.dart';
+import '../providers/navigation_provider.dart';
+import 'select_curriculum_screen.dart';
+import 'curriculum_screen.dart';
 import 'profile_screen.dart';
 import 'history_screen.dart';
 import '../models/history_model.dart';
@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Danh sách các màn hình tương ứng với các Tab
   late final List<Widget> _screens = [
     const HomeContent(),
-    const FormulaScreen(),
+    const CurriculumScreen(),
     const HistoryScreen(),
     const ProfileScreen(),
   ];
@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _navBtn(0, Icons.home_rounded, "Trang chủ"),
-            _navBtn(1, Icons.auto_awesome_motion_rounded, "Công thức"),
+            _navBtn(1, Icons.auto_awesome_motion_rounded, "Giáo trình"),
             _buildCenterCreateButton(),
             _navBtn(2, Icons.history_rounded, "Lịch sử"),
             _navBtn(3, Icons.person_rounded, "Hồ sơ"),
@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const SolveProblemScreen()),
+          MaterialPageRoute(builder: (context) => const SelectCurriculumScreen()),
         ).then((_) {
           context.read<HistoryProvider>().fetchHistory();
 
@@ -136,7 +136,6 @@ class HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final user = context.watch<AuthProvider>().user;
     final historyProvider = context.watch<HistoryProvider>();
 
@@ -206,7 +205,7 @@ class HomeContent extends StatelessWidget {
         onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => const SolveProblemScreen())),
+                builder: (context) => const SelectCurriculumScreen())),
         borderRadius: BorderRadius.circular(28),
         child: Ink(
           padding: const EdgeInsets.all(24),
