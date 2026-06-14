@@ -12,30 +12,30 @@ class OCRService:
     def extract_latex(self, image_path: str) -> str:
         try:
             image = Image.open(image_path)
-
             latex = self.model(image)
+            if not latex: return ""
 
-            if not latex:
-                return ""
+            # 1. Làm sạch cơ bản
+            cleaned = latex.strip()
 
-            cleaned_latex = latex.strip()
-
-            tags_to_remove = [
-                r"\scriptstyle", r"\textstyle", r"\displaystyle", r"\small",
-                r"\;", r"\,", r"\!", r"\quad"
-            ]
+            tags_to_remove = [r"\scriptstyle", r"\textstyle", r"\displaystyle", r"\small", r"\,", r"\;", r"\!",
+                              r"\quad", r"\mathrm", r"\text"]
             for tag in tags_to_remove:
-                cleaned_latex = cleaned_latex.replace(tag, "")
+                cleaned = cleaned.replace(tag, "")
 
-            cleaned_latex = cleaned_latex.replace(r"\left", "")
-            cleaned_latex = cleaned_latex.replace(r"\right", "")
+            # 2. Xử lý khoảng trắng và ngoặc
+            cleaned = cleaned.replace(r"\left", "").replace(r"\right", "").replace(" ", "")
 
-            cleaned_latex = re.sub(r'\s+', ' ', cleaned_latex).strip()
+            cleaned = re.sub(r'(\d)([a-zA-Z])', r'\1*\2', cleaned)
 
-            logger.info(f"OCR trích xuất thành công: {cleaned_latex}")
+            # 4. Thay các ký tự lạ thành ký tự SymPy hiểu
+            cleaned = cleaned.replace(r"\cdot", "*").replace("×", "*")
 
-            return cleaned_latex
+            # 5. Đảm bảo dấu bằng không bị lỗi cách
+            cleaned = cleaned.replace("=", "=")
 
+            logger.info(f"OCR trích xuất sau khi làm sạch: {cleaned}")
+            return cleaned
         except Exception as e:
             logger.error(f"Lỗi module OCR tại {image_path}: {str(e)}")
             raise Exception(f"Không thể nhận diện hình ảnh. Vui lòng chụp lại rõ nét hơn.")

@@ -62,6 +62,7 @@ def solve_math(
         # Tự động gọi trạm gác Grade_Solver tương ứng, nó sẽ tự detect dạng bài
         grade_solver = get_grade_solver(grade_id)
         result = grade_solver.solve(content)
+        graph_img = result.get("graph_image")
 
         # Xử lý đồng bộ trường dữ liệu steps và steps_latex an toàn
         if "steps_latex" not in result:
@@ -84,6 +85,7 @@ def solve_math(
             result["problem_type"] = "algebra_math"
 
         result["solver"] = "sympy"
+        result["graph_image"] = graph_img
 
         return result
 
@@ -115,8 +117,10 @@ def _solve_ai(
             )
             result["steps"] = steps
             result["steps_latex"] = latex_steps
+            graph_img = result.get("graph_image")
 
         result["solver"] = "ai"
+        result["graph_image"] = graph_img
         return result
 
     except Exception as e:
