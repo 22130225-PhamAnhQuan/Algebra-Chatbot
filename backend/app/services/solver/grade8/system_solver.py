@@ -1,104 +1,60 @@
-from sympy import *
-from sympy import latex
+from sympy import symbols, Eq, solve, latex, simplify
+from app.services.solver.parser import parse_equation
 
 
-class LinearSolver:
-
+class SystemSolver:
     def solve(self, content: str):
-
-        steps = []
-        steps_latex = []
+        TEX_HE = "\\text{Giải hệ phương trình: }"
+        TEX_NGHIEM = "\\text{Vậy hệ có nghiệm duy nhất: }"
 
         try:
-            # 1. Khai báo biến x và nạp phương trình từ chuỗi (Ví dụ: "2*x + 1 = x - 3")
-            x = symbols('x')
+            steps_latex = []
+            x, y = symbols("x y")
 
-            # Tách chuỗi thành vế trái (lhs) và vế phải (rhs) qua dấu "="
-            if "=" in content:
-                lhs_str, rhs_str = content.split("=")
-                lhs = sympify(lhs_str)
-                rhs = sympify(rhs_str)
-            else:
-                lhs = sympify(content)
-                rhs = S.Zero
+            eqs = [e.strip() for e in content.replace('\n', ';').split(';') if e.strip()]
 
-            # Ghi nhận đề bài ban đầu
-            steps.append("")
-            steps_latex.append(latex(Eq(lhs, rhs)))
+            if len(eqs) != 2:
+                return {"result": "Lỗi",
+                        "steps_latex": [r"\text{Vui lòng nhập hệ gồm 2 phương trình (cách nhau bởi dấu ;)}"]}
 
-            # Chuyển vế tổng quát về dạng: Vế trái - Vế phải = 0
-            expr = lhs - rhs
+            # Chuyển đổi sang biểu thức SymPy
+            equations = []
+            for eq_str in eqs:
+                _, lhs, rhs, _ = parse_equation(eq_str)
+                equations.append(Eq(lhs, rhs))
 
-            # 2. KIỂM TRA PHƯƠNG TRÌNH TÍCH (Dạng bài đặc trưng lớp 8)
-            if isinstance(expr, Mul) or (hasattr(expr, 'is_Add') and not expr.is_Add):
-                # Thử phân tích nhân tử xem có phải phương trình tích không
-                factored = factor(expr)
-                if isinstance(factored, Mul):
-                    steps.append("")
-                    steps_latex.append(f"\\Leftrightarrow {latex(Eq(factored, 0))}")
+            eq1, eq2 = equations
+            system_latex = f"\\left\\{{\\begin{{matrix}} {latex(eq1)} \\\\ {latex(eq2)} \\end{{matrix}}\\right."
+            steps_latex.append(f"{TEX_HE} {system_latex}")
 
-                    args = factored.args
-                    # Liệt kê các phương trình thành phần
-                    steps.append("")
-                    steps_latex.append(r"\Leftrightarrow \left[\begin{aligned} " + r" \\ ".join(
-                        [f"{latex(Eq(arg, 0))}" for arg in args if arg.has(x)]) + r" \end{aligned}\right.")
+            # Giải hệ
+            result = solve((eq1, eq2), (x, y), dict=True)
 
-                    # Tìm tập nghiệm
-                    sols = solve(factored, x)
-                    sols_text = "; ".join([latex(s) for s in sols])
-                    steps.append("")
-                    steps_latex.append(f"\\Leftrightarrow S = \\{{{sols_text}\\}}")
+            if not result:
+                steps_latex.append(r"\Rightarrow \text{Hệ phương trình vô nghiệm}")
+                return {"result": "Vô nghiệm", "latex": r"\emptyset", "steps_latex": steps_latex,
+                        "type": "system_equation"}
 
-                    return {"result": str(sols), "latex": f"S = \\{{{sols_text}\\}}", "steps": steps,
-                            "steps_latex": steps_latex}
+            sol = result[0]
+            x_val = simplify(sol.get(x, x))
+            y_val = simplify(sol.get(y, y))
 
-            # Bước 1: Khai triển phá ngoặc hai vế (nếu có)
-            lhs_expanded = expand(lhs)
-            rhs_expanded = expand(rhs)
-            if lhs_expanded != lhs or rhs_expanded != rhs:
-                steps.append("")
-                steps_latex.append(f"\\Leftrightarrow {latex(Eq(lhs_expanded, rhs_expanded))}")
+            steps_latex.append(r"\text{Áp dụng phương pháp giải hệ, ta tìm được:}")
+            steps_latex.append(
+                f"\\Leftrightarrow \\left\\{{\\begin{{matrix}} x = {latex(x_val)} \\\\ y = {latex(y_val)} \\end{{matrix}}\\right.")
 
-            # Bước 2: Chuyển các hạng tử chứa x sang VT, hằng số sang VP
-            coeff_x = Poly(lhs_expanded - rhs_expanded, x).coeff_monomial(x)
-            const_val = (lhs_expanded - rhs_expanded).subs(x, 0)
-
-            vt_final = coeff_x * x
-            vp_final = -const_val
-
-            steps.append("")
-            steps_latex.append(f"\\Leftrightarrow {latex(Eq(vt_final, vp_final))}")
-
-            # Bước 3: Tìm nghiệm
-            sols = solve(Eq(vt_final, vp_final), x)
-
-            if not sols:
-                steps_latex.append(r"\Leftrightarrow \text{Phương trình vô nghiệm}")
-                result_latex = r"\emptyset"
-                result_text = "Vô nghiệm"
-            else:
-                # Nếu có nhiều nghiệm (ví dụ giải phương trình bậc 2 vô tình lọt vào)
-                if len(sols) > 1:
-                    sols_text = "; ".join([f"{sol}" for sol in sols])
-                    steps_latex.append(f"\\Leftrightarrow \\text{{Nghiệm: }} x \\in \\{{{sols_text}\\}}")
-                    result_latex = f"S = \\{{{sols_text}\\}}"
-                    result_text = f"S = {{{sols_text}}}"
-                else:
-                    sol_val = sols[0]
-                    steps_latex.append(f"\\Leftrightarrow x = {sol_val}")
-                    result_latex = f"x = {sol_val}"
-                    result_text = f"x = {sol_val}"
+            steps_latex.append(f"{TEX_NGHIEM} (x; y) = ({latex(x_val)}; {latex(y_val)})")
 
             return {
-                "result": result_text,
-                "latex": result_latex,
-                "steps_latex": steps_latex
+                "result": f"x = {x_val}, y = {y_val}",
+                "latex": f"(x; y) = ({latex(x_val)}; {latex(y_val)})",
+                "steps_latex": steps_latex,
+                "type": "system_equation"
             }
 
         except Exception as e:
             return {
                 "result": "Lỗi",
-                "latex": r"\text{Phương trình không hợp lệ}",
-                "steps": [""],
-                "steps_latex": [r"\text{Cú pháp phương trình chưa đúng}"]
+                "latex": "\\text{Lỗi cú pháp}",
+                "steps_latex": [f"\\text{{Lỗi: {str(e)}}}"]
             }

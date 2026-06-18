@@ -1,29 +1,32 @@
 import re
-from sympy import sympify, together, cancel, Rational
-from math import lcm
-
+from sympy import sympify, lcm, latex
 
 class FractionArithmeticSolver:
     def solve(self, content: str):
-        steps = []
-        clean_content = content.replace(":", "/").replace("÷", "/").replace("×", "*")
-
-        steps.append(f"\\text{{Biểu thức phân số: }} {content}")
-
-        denominators = [int(m[1]) for m in re.findall(r'(\d+)/(\d+)', clean_content)]
-
-        if len(denominators) >= 2:
-            msc = lcm(*denominators)
-            steps.append(f"\\text{{- Mẫu số chung (BCNN): }} {msc}")
+        try:
+            steps_latex = []
+            clean_content = content.replace(":", "/").replace("÷", "/").replace("×", "*")
 
             expr = sympify(clean_content, evaluate=False)
-            steps.append(f"\\text{{- Quy đồng mẫu số và thực hiện tính toán:}}")
+            steps_latex.append(f"\\text{{Thực hiện phép tính phân số: }} {latex(expr)}")
 
-        result = sympify(clean_content)  # Tính ra phân số tối giản bằng SymPy
-        steps.append(f"= {result}")
+            denominators = [int(m[1]) for m in re.findall(r'(\d+)/(\d+)', clean_content)]
 
-        return {
-            "result": f"{result}",
-            "latex": f"{result}",
-            "steps_latex": steps
-        }
+            if len(denominators) >= 2:
+                msc = denominators[0]
+                for d in denominators[1:]:
+                    msc = lcm(msc, d)
+                steps_latex.append(f"\\text{{- Mẫu số chung (BCNN các mẫu): }} {msc}")
+                steps_latex.append(f"\\text{{- Quy đồng mẫu số và tính toán:}}")
+
+            result = sympify(clean_content)
+            steps_latex.append(f"= {latex(result)}")
+
+            return {
+                "result": str(result),
+                "latex": latex(result),
+                "steps_latex": steps_latex,
+                "type": "fraction_arithmetic"
+            }
+        except Exception as e:
+            return {"result": "Lỗi", "latex": "\\text{Lỗi dữ liệu}", "steps_latex": [f"\\text{{Lỗi: {str(e)}}}"]}

@@ -66,11 +66,5 @@ def generate_ai_response(db, conversation_id: int, question: str) -> str:
         logger.error("Cannot connect to Ollama")
         return "Hệ thống Gia sư AI hiện không khả dụng, em vui lòng thử lại sau nhé."
     except Exception as e:
-        print("====== BẮT ĐẦU BÁO CÁO LỖI OLLAMA ======")
-        print(f"1. URL đang gọi: {target_url}")
-        print(f"2. Danh sách tin nhắn gửi đi: {messages}")
-        print(f"3. Lỗi chi tiết (Exception): {str(e)}")
-        print("====== KẾT THÚC BÁO CÁO ======")
-
         logger.error(f"Ollama error: {e}")
         return "Có lỗi xảy ra trong quá trình suy luận của AI."

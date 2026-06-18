@@ -1,55 +1,39 @@
-from sympy import *
-
-from sympy import latex
+from sympy import expand, simplify, latex
+from app.services.solver.parser import parse_equation
 
 
 class SimplifySolver:
-
     def solve(self, content: str):
+        TEX_TA_CO = "\\text{Ta có: }"
+        TEX_KET_QUA = "\\text{Vậy kết quả là: }"
 
-        steps = []
-        steps_latex = []
+        try:
+            main_var, lhs, rhs, var_name = parse_equation(content)
+            expr = lhs - rhs if rhs != 0 else lhs
 
-        expr = sympify(content)
+            steps_latex = []
+            steps_latex.append(f"{TEX_TA_CO} {latex(expr)}")
 
-        steps.append("Ta có:")
-        steps.append(str(expr))
+            expanded = expand(expr)
+            if expanded != expr:
+                steps_latex.append(f"= {latex(expanded)}")
 
-        steps_latex.append(
-            latex(expr)
-        )
+            simplified = simplify(expanded)
+            if simplified != expanded:
+                steps_latex.append(f"= {latex(simplified)}")
 
-        expanded = expand(expr)
+            steps_latex.append(f"{TEX_KET_QUA} {latex(simplified)}")
 
-        if expanded != expr:
+            return {
+                "result": str(simplified),
+                "latex": latex(simplified),
+                "steps_latex": steps_latex,
+                "type": "simplify"
+            }
 
-            steps.append(
-                f"= {expanded}"
-            )
-
-            steps_latex.append(
-                latex(expanded)
-            )
-
-        simplified = simplify(expanded)
-
-        if simplified != expanded:
-
-            steps.append(
-                f"= {simplified}"
-            )
-
-            steps_latex.append(
-                latex(simplified)
-            )
-
-        steps.append(
-            f"Vậy kết quả là: {simplified}"
-        )
-
-        return {
-            "result": str(simplified),
-            "latex": latex(simplified),
-            "steps": steps,
-            "steps_latex": steps_latex
-        }
+        except Exception as e:
+            return {
+                "result": "Lỗi",
+                "latex": "\\text{Lỗi cú pháp}",
+                "steps_latex": [f"\\text{{Lỗi: {str(e)}}}"]
+            }

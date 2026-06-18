@@ -16,14 +16,15 @@ class ChatProvider extends ChangeNotifier {
   Future<void> setInitialSolution(String problemText, SolutionModel solution) async {
     messages.clear();
     solutionData = solution;
+    currentConversationId = solution.conversationId;
 
+    // 1. LUÔN LUÔN hiển thị đề bài và lời giải toán ở đầu màn hình
     messages.add(ChatMessage(
       sender: 'USER',
       content: problemText,
       type: 'text',
       createdAt: DateTime.now(),
     ));
-
     messages.add(ChatMessage(
       sender: 'BOT',
       content: "Xong rồi! Đây là lời giải chi tiết cho bạn:",
@@ -34,23 +35,22 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (solution.problemId != null) {
-        final prefs = await SharedPreferences.getInstance();
-        final token = prefs.getString('token');
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
 
-        if (token != null) {
-          final conversationId = await ChatApiService.createConversation(
-            problemId: solution.problemId!,
-            token: token,
-          );
-          currentConversationId = conversationId;
-          debugPrint("Đã khởi tạo phòng chat AI (từ màn hình ngoài) với ID: $currentConversationId");
+      if (currentConversationId != null && token != null) {
+        final historyMessages = await ChatApiService.getChatHistory(
+          conversationId: currentConversationId!,
+          token: token,
+        );
+
+        if (historyMessages.isNotEmpty) {
+          messages.addAll(historyMessages);
+          notifyListeners();
         }
-      } else {
-        debugPrint("Lỗi: Không tìm thấy problemId trong SolutionModel");
       }
     } catch (e) {
-      debugPrint("Lỗi khi tạo phòng chat ban đầu: $e");
+      debugPrint("Lỗi tải lịch sử chat: $e");
     }
   }
 
@@ -73,13 +73,28 @@ class ChatProvider extends ChangeNotifier {
       ));
       notifyListeners();
 
-      // 1. Gọi API giải toán
+      // 1. GỌI API GIẢI TOÁN
       final result = await SolverService.solve(
         text: problemText,
         token: token,
       );
-
       solutionData = result;
+
+      if (result.problemId != null) {
+        final conversationId = await ChatApiService.createConversation(
+          problemId: result.problemId!,
+          token: token,
+        );
+        currentConversationId = conversationId;
+        debugPrint("[ChatProvider] Đã tạo thành công Conversation ID: $currentConversationId");
+      }
+
+      if (result.conversationId != null) {
+        currentConversationId = result.conversationId;
+        debugPrint("[ChatProvider] Đã nhận Conversation ID từ Backend: $currentConversationId");
+      } else {
+        debugPrint("[ChatProvider] Không có conversationId!");
+      }
 
       messages.add(ChatMessage(
         sender: 'BOT',
@@ -88,19 +103,11 @@ class ChatProvider extends ChangeNotifier {
         createdAt: DateTime.now(),
       ));
 
-      if (result.problemId != null) {
-        final conversationId = await ChatApiService.createConversation(
-          problemId: result.problemId!,
-          token: token,
-        );
-        currentConversationId = conversationId;
-        debugPrint("Đã khởi tạo phòng chat AI thành công với ID: $currentConversationId");
-      }
-
     } catch (e) {
+      debugPrint("[ChatProvider] Lỗi giải toán: $e");
       messages.add(ChatMessage(
         sender: 'BOT',
-        content: "Lỗi: $e",
+        content: "Lỗi hệ thống: $e",
         type: 'text',
         createdAt: DateTime.now(),
       ));

@@ -1,25 +1,28 @@
-from sympy import sympify, Pow
+from sympy import sympify, Pow, latex
 
 class ExponentSolver:
     def solve(self, content: str):
-        steps = []
-        clean_content = content.replace("^", "**")
-        expr = sympify(clean_content)
+        try:
+            steps_latex = []
+            clean_content = content.replace("^", "**")
+            expr = sympify(clean_content)
 
-        steps.append(f"\\text{{Tính lũy thừa: }} {content}")
+            steps_latex.append(f"\\text{{Tính giá trị lũy thừa: }} {latex(expr)}")
 
-        if isinstance(expr, Pow):
-            base = expr.base
-            exp = expr.exp
-            if str(exp).isdigit() and int(exp) <= 10:
-                multiplication = " \\cdot ".join([str(base)] * int(exp))
-                steps.append(f"= {multiplication}")
+            if isinstance(expr, Pow):
+                base, exp = expr.base, expr.exp
+                if str(exp).isdigit() and int(exp) <= 10:
+                    multiplication = " \\cdot ".join([latex(base)] * int(exp))
+                    steps_latex.append(f"= {multiplication}")
 
-        result = expr.doit()
-        steps.append(f"= {result}")
+            result = expr.doit()
+            steps_latex.append(f"= {latex(result)}")
 
-        return {
-            "result": f"{result}",
-            "latex": f"{result}",
-            "steps_latex": steps
-        }
+            return {
+                "result": str(result),
+                "latex": latex(result),
+                "steps_latex": steps_latex,
+                "type": "exponent"
+            }
+        except Exception as e:
+            return {"result": "Lỗi", "latex": "\\text{Lỗi dữ liệu}", "steps_latex": [f"\\text{{Lỗi: {str(e)}}}"]}

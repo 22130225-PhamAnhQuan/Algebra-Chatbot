@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../core/constants/api_config.dart';
+import '../models/chat_model.dart';
 
 class ChatApiService {
   static const String baseUrl = "${ApiConfig.baseUrl}/chat";
@@ -51,5 +52,30 @@ class ChatApiService {
       return data["response"]; // Trả về text câu trả lời của AI
     }
     throw Exception("Gia sư AI đang bận, không thể gửi tin nhắn");
+  }
+
+  static Future<List<ChatMessage>> getChatHistory({
+    required int conversationId,
+    required String token,
+  }) async {
+    final response = await http.get(
+      Uri.parse("$baseUrl/chat/messages/$conversationId"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
+      return data.map((msg) => ChatMessage(
+        // Chuyển đổi 'role' từ DB thành 'sender' cho UI
+        sender: msg['role'] == 'user' ? 'USER' : 'BOT',
+        content: msg['content'],
+        type: 'text',
+        createdAt: DateTime.parse(msg['created_at'] ?? DateTime.now().toIso8601String()),
+      )).toList();
+    }
+    throw Exception("Không thể tải lịch sử trò chuyện");
   }
 }

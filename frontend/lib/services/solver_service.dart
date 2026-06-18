@@ -53,7 +53,7 @@ class SolverService {
           .convert(responseBody),
     );
 
-    return SolutionModel.fromJson(solution);
+    return SolutionModel.fromJson(responseBody);
   }
 
   static Future<SolutionModel> solveImage({
@@ -105,7 +105,7 @@ class SolverService {
       throw "Invalid solution format";
     }
 
-    return SolutionModel.fromJson(solution);
+    return SolutionModel.fromJson(body);
   }
 
   static Future<SolutionModel> solve({

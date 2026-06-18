@@ -1,33 +1,25 @@
-from sympy import factorint, lcm
-
+import re
+from sympy import factorint, lcm, latex
 
 class LcmSolver:
-
     def solve(self, content: str):
-
-        steps = []
-
         try:
-            parts = content.replace(",", " ").split()
-            a = int(parts[0])
-            b = int(parts[1])
-        except (ValueError, IndexError):
+            steps_latex = []
+            nums = [int(s) for s in re.findall(r'\d+', content)]
+            if len(nums) < 2:
+                return {"result": "Lỗi", "steps_latex": [r"\text{Vui lòng nhập ít nhất 2 số (VD: 12, 15)}"]}
+
+            a, b = nums[0], nums[1]
+            steps_latex.append(f"\\text{{Tìm Bội chung nhỏ nhất: BCNN}}({a}, {b})")
+
+            result = lcm(a, b)
+            steps_latex.append(f"\\Rightarrow \\text{{BCNN}}({a}, {b}) = {result}")
+
             return {
-                "result": "Lỗi định dạng",
-                "steps": ["Định dạng: 'a b' hoặc 'a, b'"]
+                "result": str(result),
+                "latex": str(result),
+                "steps_latex": steps_latex,
+                "type": "lcm"
             }
-
-        steps.append(
-            f"Tìm BCNN({a},{b})"
-        )
-
-        result = lcm(a, b)
-
-        steps.append(
-            f"BCNN({a},{b}) = {result}"
-        )
-
-        return {
-            "result": str(result),
-            "steps": steps
-        }
+        except Exception as e:
+            return {"result": "Lỗi", "latex": "\\text{Lỗi dữ liệu}", "steps_latex": [f"\\text{{Lỗi: {str(e)}}}"]}

@@ -11,6 +11,7 @@ import 'profile_screen.dart';
 import 'history_screen.dart';
 import '../models/history_model.dart';
 import 'chat_screen.dart';
+import 'package:flutter_math_fork/flutter_math.dart';
 import '../models/solution_model.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -364,7 +365,7 @@ class RecentHistoryMiniList extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
 
-                  // Phần nội dung (Đã ép maxLines: 1 để chống tràn)
+                  // Phần nội dung
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -380,15 +381,40 @@ class RecentHistoryMiniList extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          "→ ${item.result}",
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
+
+                        Row(
+                          children: [
+                            const Text(
+                              "→ ",
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal, // Cuộn ngang chống tràn viền
+                                child: Math.tex(
+                                  item.result.replaceAll(r'$', '').trim(),
+                                  textStyle: const TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 13,
+                                  ),
+                                  onErrorFallback: (err) => Text(
+                                    item.result,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: AppColors.primary,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

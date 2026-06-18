@@ -42,6 +42,6 @@ class LinearGraphSolver:
             "result": f"y = {latex(expr)}",
             "latex": f"y = {latex(expr)}",
             "steps_latex": steps_latex,
-            "image": image,
+            "graph_image": image,
             "type": "linear"
         }
