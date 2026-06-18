@@ -33,7 +33,9 @@ class HistoryProvider extends ChangeNotifier {
         for (var item in data) {
           try {
             temp.add(HistoryItem.fromJson(item));
-          } catch (_) {}
+          } catch (e) {
+            debugPrint("Lỗi Parse Lịch sử (ID: ${item['id']}): $e");
+          }
         }
 
         if (merge) {
