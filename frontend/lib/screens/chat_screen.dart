@@ -90,14 +90,14 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Consumer<ChatProvider>(
               builder: (context, provider, child) {
                 WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => _scrollToBottom(),
+                      (_) => _scrollToBottom(),
                 );
 
                 return ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.all(16),
                   itemCount:
-                      provider.messages.length + (provider.isSending ? 1 : 0),
+                  provider.messages.length + (provider.isSending ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index == provider.messages.length) {
                       return _buildLoadingState(isDark);
@@ -116,10 +116,10 @@ class _ChatScreenState extends State<ChatScreen> {
                               (index ==
                                   provider.messages.indexOf(
                                     provider.messages.firstWhere(
-                                      (m) => m.sender == 'BOT',
+                                          (m) => m.sender == 'BOT',
                                     ),
                                   ))) &&
-                          provider.solutionData != null;
+                              provider.solutionData != null;
                       return _buildBotBubble(
                         msg.content,
                         isDark,
@@ -227,10 +227,10 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildBotBubble(
-    String content,
-    bool isDark, {
-    bool isSolution = false,
-  }) {
+      String content,
+      bool isDark, {
+        bool isSolution = false,
+      }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Row(
@@ -271,18 +271,60 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  List<Widget> _parseTextWithMath(String text, bool isDark) {
+    List<Widget> widgets = [];
+
+    // Regex bắt trọn \[...\], \(...\), $$...$$, $...$
+    final regex = RegExp(
+      r'\\\[(.*?)\\\]|\\\((.*?)\\\)|\$\$(.*?)\$\$|\$(.*?)\$',
+      dotAll: true,
+    );
+
+    int lastIndex = 0;
+
+    for (final match in regex.allMatches(text)) {
+      if (match.start > lastIndex) {
+        widgets.add(Text(
+          text.substring(lastIndex, match.start),
+          style: TextStyle(fontSize: 15, color: isDark ? Colors.white : Colors.black87, height: 1.4),
+        ));
+      }
+
+      String mathContent = match.group(1) ?? match.group(2) ?? match.group(3) ?? match.group(4) ?? "";
+
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 2.0),
+          child: Math.tex(
+            mathContent.trim(),
+            textStyle: TextStyle(fontSize: 15, color: isDark ? Colors.white : Colors.black87),
+            onErrorFallback: (err) => Text(
+              mathContent,
+              style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+            ),
+          ),
+        ),
+      );
+
+      lastIndex = match.end;
+    }
+
+    if (lastIndex < text.length) {
+      widgets.add(Text(
+        text.substring(lastIndex),
+        style: TextStyle(fontSize: 15, color: isDark ? Colors.white : Colors.black87, height: 1.4),
+      ));
+    }
+
+    return widgets.isEmpty
+        ? [Text(text, style: TextStyle(fontSize: 15, color: isDark ? Colors.white : Colors.black87))]
+        : widgets;
+  }
+
   Widget _buildSimpleText(String text, bool isDark) {
-    return Math.tex(
-      text,
-      textStyle: TextStyle(
-        fontSize: 15,
-        color: isDark ? Colors.white : Colors.black87,
-        height: 1.4,
-      ),
-      onErrorFallback: (err) => Text(
-        text,
-        style: TextStyle(color: isDark ? Colors.white : Colors.black87),
-      ),
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: _parseTextWithMath(text, isDark),
     );
   }
 
@@ -344,7 +386,6 @@ class _ChatScreenState extends State<ChatScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header của khung giải toán
               Row(
                 children: [
                   const Icon(Icons.auto_awesome, color: AppColors.primary, size: 20),
@@ -471,13 +512,12 @@ class _ChatScreenState extends State<ChatScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.success.withOpacity(0.05), // Màu nền nhẹ cho kết quả
+            color: AppColors.success.withOpacity(0.05),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.success.withOpacity(0.3)),
           ),
           child: Column(
             children: [
-              // Đồ thị
               if (data.hasImage)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
@@ -586,6 +626,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildStepRow(String rawLine, bool isDark) {
     String cleanContent = rawLine
+        .replaceAll(r'\[', '')  // Xóa mở ngoặc vuông LaTeX
+        .replaceAll(r'\]', '')  // Xóa đóng ngoặc vuông LaTeX
+        .replaceAll(r'\(', '')  // Xóa mở ngoặc tròn LaTeX
+        .replaceAll(r'\)', '')  // Xóa đóng ngoặc tròn LaTeX
         .replaceAll(r'\begin{align*}', '')
         .replaceAll(r'\end{align*}', '')
         .replaceAll(r'\begin{align}', '')
@@ -593,7 +637,8 @@ class _ChatScreenState extends State<ChatScreen> {
         .replaceAll(r'$', '')
         .trim();
 
-    if (cleanContent.isEmpty) return const SizedBox.shrink();
+    // Loại bỏ chữ "c" vô nghĩa do parser cũ sinh ra
+    if (cleanContent.isEmpty || cleanContent == 'c') return const SizedBox.shrink();
 
     RegExp textRegex = RegExp(r'\\text\{([^}]+)\}');
     String textDescription = "";
@@ -604,7 +649,7 @@ class _ChatScreenState extends State<ChatScreen> {
       cleanContent = cleanContent.replaceAll(textRegex, '').trim();
     }
 
-    bool isMath = cleanContent.contains(r'\') || // Bắt TẤT CẢ các lệnh LaTeX (\mathbb, \begin, \hline...)
+    bool isMath = cleanContent.contains(r'\') ||
         cleanContent.contains('^') ||
         cleanContent.contains('_') ||
         cleanContent.contains('=') ||
@@ -613,9 +658,9 @@ class _ChatScreenState extends State<ChatScreen> {
         cleanContent.contains('>');
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 14), // Khoảng cách đều đặn giữa các dòng
+      padding: const EdgeInsets.only(bottom: 14),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, // Căn lề trái thẳng tắp
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (textDescription.isNotEmpty)
             Padding(
@@ -630,10 +675,9 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
 
-          // Hiển thị phần công thức toán học đi kèm
           if (cleanContent.isNotEmpty && isMath)
             SingleChildScrollView(
-              scrollDirection: Axis.horizontal, // Thanh cuộn ngang bảo vệ khi dòng toán quá dài
+              scrollDirection: Axis.horizontal,
               child: Math.tex(
                 cleanContent,
                 textStyle: TextStyle(
@@ -648,7 +692,6 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             )
           else if (cleanContent.isNotEmpty)
-          // Nếu không phải toán mà là chuỗi chữ thường còn sót lại
             Text(
               cleanContent,
               softWrap: true,
