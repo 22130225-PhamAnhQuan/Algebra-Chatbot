@@ -5,7 +5,6 @@
 [![Database: PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-%234169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![AI Model: Phi--3%20Mini](https://img.shields.io/badge/AI%20Model-Phi--3%20Mini-%230078D4?logo=microsoft&logoColor=white)](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct)
 [![OCR: Pix2Tex](https://img.shields.io/badge/OCR-Pix2Tex%20%28LatexOCR%29-%23FF6F61)](https://github.com/lukas-blecher/LaTeX-OCR)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Dự án tiểu luận tốt nghiệp: **"Phát triển ứng dụng di động chatbot hỗ trợ giải bài tập Đại Số cho học sinh trung học cơ sở"** tại Trường Đại học Nông Lâm TP.HCM - Khoa Công nghệ thông tin.
 
@@ -36,19 +35,19 @@ Hệ thống được tổ chức theo kiến trúc phân tầng (Layered Archit
 
 ## 🛠️ Công nghệ Sử dụng (Tech Stack)
 ### Frontend (Mobile App)
-Nền tảng: Flutter (Dart) - Đa nền tảng (iOS & Android).
-Kết nối HTTP: Dio (Quản lý Request, Interceptor, Upload Multipart file).
-Hiển thị Toán học: flutter_math_fork (Render biểu thức LaTeX động mượt mà).
-Phần cứng: image_picker (Tương tác Camera thiết bị và Thư viện ảnh).
+- Nền tảng: Flutter (Dart) - Đa nền tảng (iOS & Android).
+- Kết nối HTTP: Dio (Quản lý Request, Interceptor, Upload Multipart file).
+- Hiển thị Toán học: flutter_math_fork (Render biểu thức LaTeX động mượt mà).
+- Phần cứng: image_picker (Tương tác Camera thiết bị và Thư viện ảnh).
 
 ### Backend (Server API)
-Framework: FastAPI (Python) - Hiệu năng xử lý bất đồng bộ cao (async/await).
-IDE Khuyên dùng: IntelliJ IDEA.
-ORM: SQLAlchemy phối hợp với Alembic để quản lý Migration.
-Tính toán Toán học: SymPy (Symbolic Mathematics).
-Thị giác Máy tính (OCR): Pix2Tex (LatexOCR) deep learning model.
-AI Serving: Ollama chạy cục bộ (Local Model Deployment).
-Mã hóa & Bảo mật: Passlib (Băm mật khẩu Bcrypt), PyJWT (Xác thực phân quyền).
+- Framework: FastAPI (Python) - Hiệu năng xử lý bất đồng bộ cao (async/await).
+- IDE Khuyên dùng: IntelliJ IDEA.
+- ORM: SQLAlchemy phối hợp với Alembic để quản lý Migration.
+- Tính toán Toán học: SymPy (Symbolic Mathematics).
+- Thị giác Máy tính (OCR): Pix2Tex (LatexOCR) deep learning model.
+- AI Serving: Ollama chạy cục bộ (Local Model Deployment).
+- Mã hóa & Bảo mật: Passlib (Băm mật khẩu Bcrypt), PyJWT (Xác thực phân quyền).
 
 ### Database & DevOps
 Cơ sở dữ liệu: PostgreSQL (Lưu trữ quan hệ toàn vẹn ACID).
@@ -63,20 +62,20 @@ Khởi động Ollama và kéo mô hình Phi-3 Mini về máy:
 ollama run phi3:mini
 
 #### 2. Triển khai Backend FastAPI (Local Development)
-Mở project bằng IntelliJ IDEA, mở terminal (chỉ định thư mục backend) và khởi tạo môi trường ảo:
+- Mở project bằng IntelliJ IDEA, mở terminal (chỉ định thư mục backend) và khởi tạo môi trường ảo:
 cd backend
 python -m venv venv
-source venv/bin/activate
-Trên Windows dùng: venv\Scripts\activate
+- Trên IOS/Linux: source venv/bin/activate
+- Trên Windows dùng: venv\Scripts\activate
 
-Cài đặt các thư viện phụ thuộc:
+- Cài đặt các thư viện phụ thuộc:
 pip install -r requirements.txt
-Cấu hình file .env tại thư mục gốc backend:
-DATABASE_URL=postgresql://user:password@localhost:5432/math_tutor
-OLLAMA_URL=http://localhost:11434
-SECRET_KEY=your_super_secret_jwt_key
-ALGORITHM=HS256
-Khởi chạy Server FastAPI:
+- Cấu hình file .env tại thư mục gốc backend:
+  - DATABASE_URL=postgresql://user:password@localhost:5432/math_tutor
+  - OLLAMA_URL=http://localhost:11434
+  - SECRET_KEY=your_super_secret_jwt_key
+  - ALGORITHM=HS256
+- Khởi chạy Server FastAPI:
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 #### 3. Triển khai Nhanh bằng Docker Compose (Production Setup)
@@ -84,21 +83,21 @@ Hệ thống hỗ trợ đóng gói container toàn bộ Backend và Database ch
 
 docker-compose up --build -d
 4. Triển khai Frontend Ứng dụng di động (Flutter)
-Lưu ý: Mặc định mã nguồn chính và các ca kiểm thử ổn định được lưu hành tại nhánh phát triển testcase_anhtuan.
+- Lưu ý: Mặc định mã nguồn chính và các ca kiểm thử ổn định được lưu hành tại nhánh phát triển testcase_anhtuan.
 
-Chuyển sang nhánh làm việc chính xác:
+- Chuyển sang nhánh làm việc chính xác:
 git checkout testcase_anhtuan
-Tải các Packages phụ thuộc:
+- Tải các Packages phụ thuộc:
 flutter pub get
-Cấu hình IP Endpoint trỏ về Backend trong file lib/services/api_service.dart:
-Nếu chạy máy ảo Android Emulator: sử dụng http://10.0.2.2:8000
-Nếu chạy thiết bị thật: Sử dụng IP cục bộ của máy tính của bạn (VD: http://192.168.1.X:8000).
-Khởi chạy ứng dụng:
+- Cấu hình IP Endpoint trỏ về Backend trong file lib/services/api_service.dart:
+  - Nếu chạy máy ảo Android Emulator: sử dụng http://10.0.2.2:8000
+  - Nếu chạy thiết bị thật: Sử dụng IP cục bộ của máy tính của bạn (VD: http://192.168.1.X:8000).
+- Khởi chạy ứng dụng:
 flutter run.
 
 ## 🧑‍💻 Thông tin Phát triển (Contributors)
-Sinh viên thực hiện: Phạm Anh Quân
-Mã số sinh viên (MSSV): 22130225
-Lớp: DH22DTA
-Giảng viên hướng dẫn: Thạc sĩ Nguyễn Đức Công Song
-Đơn vị công tác: Khoa Công nghệ Thông tin - Trường Đại học Nông Lâm TP.HCM.
+- Sinh viên thực hiện: Phạm Anh Quân
+- Mã số sinh viên (MSSV): 22130225
+- Lớp: DH22DTA
+- Giảng viên hướng dẫn: Thạc sĩ Nguyễn Đức Công Song
+- Đơn vị công tác: Khoa Công nghệ Thông tin - Trường Đại học Nông Lâm TP.HCM.
