@@ -167,6 +167,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             latex: item.latex,
             steps: item.steps,
             image: item.graphImage,
+            conversationId: item.conversationId,
           );
 
           // Chuyển sang màn hình Chat
