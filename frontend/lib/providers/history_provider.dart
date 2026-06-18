@@ -16,9 +16,6 @@ class HistoryProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
-  // =========================
-  // FETCH HISTORY
-  // =========================
   Future<void> fetchHistory({bool merge = false}) async {
     _isLoading = true;
     _errorMessage = "";
@@ -63,9 +60,6 @@ class HistoryProvider extends ChangeNotifier {
     }
   }
 
-  // =========================
-  // 🔥 AUTO SYNC (REALTIME)
-  // =========================
   void startAutoSync() {
     _autoSyncTimer?.cancel();
 
@@ -82,9 +76,6 @@ class HistoryProvider extends ChangeNotifier {
     _autoSyncTimer = null;
   }
 
-  // =========================
-  // DELETE
-  // =========================
   Future<void> deleteHistory(int historyId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -103,17 +94,13 @@ class HistoryProvider extends ChangeNotifier {
     }
   }
 
-  // =========================
   // OPTIMISTIC ADD
-  // =========================
   void addLocalHistory(HistoryItem item) {
     _historyList.insert(0, item);
     notifyListeners();
   }
 
-  // =========================
   // CLEAR
-  // =========================
   void clearHistory() {
     _historyList = [];
     notifyListeners();

@@ -34,7 +34,7 @@ class AuthService {
 
       final data = jsonDecode(utf8.decode(response.bodyBytes));
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return data['access_token'];
+        return data['access_token'] ?? data['message'] ?? 'Đăng ký thành công, vui lòng đăng nhập!';
       } else {
         throw data['detail'] ?? 'Đăng ký thất bại';
       }

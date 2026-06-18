@@ -7,6 +7,7 @@ import '../core/theme/app_theme.dart';
 import '../providers/history_provider.dart';
 import '../models/history_model.dart';
 import '../models/solution_model.dart';
+import 'package:flutter_math_fork/flutter_math.dart';
 import 'chat_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -19,37 +20,6 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   String _searchQuery = "";
   String _selectedFilter = 'Tất cả';
-
-  // Danh sách các tab hiển thị trên UI
-  final List<String> _filterKeys = [
-    'Tất cả',
-    'Phương trình',
-    'Rút gọn',
-    'Hệ phương trình',
-    'Số học',
-    'Nhân tử hóa',
-  ];
-
-  // Map từ UI Text sang key của Backend để lọc
-  final Map<String, String> _filters = {
-    'Tất cả': 'all',
-    'Phương trình': 'phuong_trinh',
-    'Rút gọn': 'rut_gon',
-    'Hệ phương trình': 'he_phuong_trinh',
-    'Số học': 'so_hoc',
-    'Nhân tử hóa': 'nhan_tu',
-  };
-
-  String _getFilterLabel(String key) {
-    switch (key) {
-      case 'phuong_trinh': return 'Phương trình';
-      case 'rut_gon': return 'Rút gọn';
-      case 'he_phuong_trinh': return 'Hệ phương trình';
-      case 'so_hoc': return 'Số học';
-      case 'nhan_tu': return 'Nhân tử hóa';
-      default: return key;
-    }
-  }
 
   @override
   void initState() {
@@ -67,7 +37,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     // Logic lọc danh sách theo Search và Filter
     List<HistoryItem> displayList = historyProvider.historyList.where((item) {
       bool matchesSearch = item.problemContent.toLowerCase().contains(_searchQuery.toLowerCase());
-      bool matchesFilter = _selectedFilter == 'Tất cả' || item.inputType == _filters[_selectedFilter];
+      bool matchesFilter = _selectedFilter == 'Tất cả';
       return matchesSearch && matchesFilter;
     }).toList();
 
@@ -75,11 +45,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       backgroundColor: theme.colorScheme.surface,
       body: Column(
         children: [
-          // 1. Header (Tổng số bài + Thanh tìm kiếm)
           _buildHeader(context, historyProvider.historyList.length),
-
-          // 2. Thanh Filter (Tuyệt đối không được thiếu dòng này)
-          _buildFilterBar(),
 
           // 3. Danh sách Card lịch sử
           Expanded(
@@ -165,60 +131,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildFilterBar() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      height: 65,
-      margin: const EdgeInsets.only(top: 8, bottom: 8),
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        scrollDirection: Axis.horizontal,
-        itemCount: _filterKeys.length,
-        itemBuilder: (ctx, i) {
-          String key = _filterKeys[i];
-          bool isSelected = _selectedFilter == key;
-
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedFilter = key;
-              });
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeInOut,
-              margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-              padding: const EdgeInsets.symmetric(horizontal: 22),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : (isDark ? AppColors.surfaceVariant : Colors.white),
-                borderRadius: BorderRadius.circular(25),
-                border: Border.all(
-                  color: isSelected
-                      ? AppColors.primary
-                      : (isDark ? Colors.white24 : Colors.grey.shade300),
-                  width: 1.5,
-                ),
-                boxShadow: isSelected && !isDark
-                    ? [BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3))]
-                    : [],
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                key,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.grey.shade700),
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildDismissibleCard(HistoryItem item) {
     return Dismissible(
       key: Key(item.id.toString()),
@@ -254,6 +166,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             result: item.result,
             latex: item.latex,
             steps: item.steps,
+            image: item.graphImage,
           );
 
           // Chuyển sang màn hình Chat
@@ -267,7 +180,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
           );
 
-          // Tự động làm mới lịch sử khi quay về màn hình này
           if (context.mounted) {
             context.read<HistoryProvider>().fetchHistory();
           }
@@ -297,12 +209,40 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             overflow: TextOverflow.ellipsis
                         ),
                         const SizedBox(height: 4),
-                        // Cắt chữ nếu AI trả về result quá dài
-                        Text(
-                            "→ ${item.result}",
-                            style: const TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w600),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis
+
+                        Row(
+                          children: [
+                            const Text(
+                              "→ ",
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal, // Cuộn ngang chống tràn viền
+                                child: Math.tex(
+                                  item.result.replaceAll(r'$', '').trim(),
+                                  textStyle: const TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 13,
+                                  ),
+                                  onErrorFallback: (err) => Text(
+                                    item.result,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: AppColors.primary,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -321,7 +261,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 children: [
                   Row(
                     children: [
-                      _buildTag(_getFilterLabel(item.inputType), AppColors.primary),
                       const SizedBox(width: 12),
                       _buildInfoItem(Icons.auto_stories_outlined, "${item.steps.length} bước"),
                       const SizedBox(width: 12),
@@ -351,10 +290,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
         title: const Text("Xóa bài toán?"),
         content: const Text("Bạn có chắc chắn muốn xóa bài giải này khỏi lịch sử không?"),
         actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text("Hủy", style: TextStyle(color: Colors.grey))
-          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red.shade50,
@@ -367,16 +302,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
             },
             child: const Text("Xóa"),
           ),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text("Hủy", style: TextStyle(color: Colors.grey))
+          ),
         ],
       ),
-    );
-  }
-
-  Widget _buildTag(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-      child: Text(text, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold)),
     );
   }
 

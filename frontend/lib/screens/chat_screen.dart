@@ -366,21 +366,19 @@ class _ChatScreenState extends State<ChatScreen> {
 
                     List<String> extractedLines = [];
 
-                    // Trường hợp 1: Nếu Backend trả về chuỗi có dạng mảng JSON "[...]"
                     if (cleanText.startsWith('[') && cleanText.endsWith(']')) {
                       try {
-                        List<dynamic> parsedList = jsonDecode(cleanText);
-                        // Biến mảng thành danh sách chuỗi
+                        String safeText = cleanText.replaceAll(r'\', r'\\').replaceAll(r'\\\\', r'\\');
+                        List<dynamic> parsedList = jsonDecode(safeText);
                         extractedLines = parsedList.map((item) => item.toString()).toList();
                       } catch (e) {
+                        debugPrint("Lỗi parse JSON trong ChatScreen: $e");
                         extractedLines = [cleanText];
                       }
                     } else {
-                      // Trường hợp 2: Nếu Backend gom chung thành 1 chuỗi dài có chứa dấu xuống dòng \n (như giải PT bậc 2)
                       extractedLines = cleanText.split('\n');
                     }
 
-                    // Lọc bỏ các dòng trống và vẽ từng Widget lên màn hình
                     return extractedLines
                         .where((line) => line.trim().isNotEmpty)
                         .map((line) => _buildStepRow(line.trim(), isDark))
@@ -415,14 +413,13 @@ class _ChatScreenState extends State<ChatScreen> {
                           style: TextStyle(color: AppColors.success, fontWeight: FontWeight.bold, fontSize: 15),
                         ),
 
-                        // Logic thông minh: Có ảnh thì báo xem ảnh, không có thì render công thức
                         (data.image != null && data.image!.isNotEmpty)
                             ? const Text(
                           "Đồ thị như hình vẽ bên trên",
                           style: TextStyle(color: AppColors.success, fontWeight: FontWeight.bold, fontSize: 15),
                         )
                             : Math.tex(
-                          data.result.replaceAll(r'$', '').trim(), // Xóa ký tự $ rác nếu có
+                          data.result.replaceAll(r'$', '').trim(),
                           textStyle: const TextStyle(color: AppColors.success, fontWeight: FontWeight.bold, fontSize: 15),
                           onErrorFallback: (err) => Text(
                             data.result,
@@ -445,31 +442,6 @@ class _ChatScreenState extends State<ChatScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "📊 Đồ thị hàm số",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // IMAGE
-        if (data.hasImage)
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Image.memory(
-              base64Decode(data.image!),
-              width: double.infinity,
-              fit: BoxFit.contain,
-            ),
-          ),
-
-        const SizedBox(height: 20),
-
-        // STEPS
         ...data.steps.map((step) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
@@ -479,22 +451,13 @@ class _ChatScreenState extends State<ChatScreen> {
                 CircleAvatar(
                   radius: 12,
                   backgroundColor: AppColors.primary,
-                  child: Text(
-                    "${step.stepNumber}",
-                    style: const TextStyle(color: Colors.white, fontSize: 11),
-                  ),
+                  child: Text("${step.stepNumber}", style: const TextStyle(color: Colors.white, fontSize: 11)),
                 ),
-
                 const SizedBox(width: 12),
-
                 Expanded(
-                  child: Text(
-                    step.description,
-                    style: TextStyle(
-                      fontSize: 14,
-                      height: 1.5,
-                      color: isDark ? Colors.white70 : Colors.black87,
-                    ),
+                  child: _buildStepRow(
+                    step.latex.isNotEmpty ? step.latex : step.description,
+                    isDark,
                   ),
                 ),
               ],
@@ -502,21 +465,29 @@ class _ChatScreenState extends State<ChatScreen> {
           );
         }),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
 
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.success.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(14),
+            color: AppColors.success.withOpacity(0.05), // Màu nền nhẹ cho kết quả
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.success.withOpacity(0.3)),
           ),
-          child: Text(
-            "Kết quả: ${data.result}",
-            style: const TextStyle(
-              color: AppColors.success,
-              fontWeight: FontWeight.bold,
-            ),
+          child: Column(
+            children: [
+              // Đồ thị
+              if (data.hasImage)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(
+                    base64Decode(data.image!),
+                    width: double.infinity,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+            ],
           ),
         ),
       ],
@@ -637,7 +608,7 @@ class _ChatScreenState extends State<ChatScreen> {
         cleanContent.contains('^') ||
         cleanContent.contains('_') ||
         cleanContent.contains('=') ||
-        cleanContent.contains('&') || // Bắt các cột trong bảng (Bảng giá trị)
+        cleanContent.contains('&') ||
         cleanContent.contains('<') ||
         cleanContent.contains('>');
 
