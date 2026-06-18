@@ -2,18 +2,20 @@ from sympy import *
 
 
 class FindFunctionSolver:
-
-    def solve(self, points):
-
+    def solve(self, content: str): # Sửa tham số thành content
         steps = []
 
-        if len(points) != 2:
-            raise Exception(
-                "Cần đúng 2 điểm"
-            )
+        matches = re.findall(r"\(\s*([-]?\d+)\s*[;,]\s*([-]?\d+)\s*\)", content)
 
-        x1, y1 = points[0]
-        x2, y2 = points[1]
+        if len(matches) != 2:
+            return {
+                "result": "Lỗi",
+                "steps": ["Không tìm đủ 2 điểm."],
+                "steps_latex": [r"\text{Vui lòng nhập đúng tọa độ 2 điểm, ví dụ: đi qua A(1; 2) và B(3; 4)}"]
+            }
+
+        x1, y1 = float(matches[0][0]), float(matches[0][1])
+        x2, y2 = float(matches[1][0]), float(matches[1][1])
 
         a, b = symbols("a b")
 
@@ -73,10 +75,9 @@ class FindFunctionSolver:
         )
 
         return {
-            "result":
-                f"y = {a_value}x + ({b_value})",
-            "steps":
-                steps,
+            "result": f"y = {a_value}x + ({b_value})",
+            "steps": steps,
+            "steps_latex": [r"\text{" + s + "}" for s in steps],
             "function": {
                 "a": str(a_value),
                 "b": str(b_value)

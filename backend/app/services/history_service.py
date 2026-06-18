@@ -14,7 +14,8 @@ class HistoryService:
             Problem.input_type,
             Solution.result,
             Solution.steps,
-            Solution.latex
+            Solution.latex,
+            Solution.graph_image
         ).outerjoin(Problem, History.problem_id == Problem.id) \
             .outerjoin(Solution, History.solution_id == Solution.id) \
             .filter(History.user_id == user_id) \
@@ -30,13 +31,13 @@ class HistoryService:
                 "result": r.result,
                 "steps": r.steps,
                 "latex": r.latex,
+                "graph_image": r.graph_image,
             }
             for r in results
         ]
 
     @staticmethod
     def delete_history_item(db: Session, history_id: int, user_id: int):
-        # Tìm đúng bản ghi thuộc về user đó để tránh xóa nhầm của người khác
         item = db.query(History).filter(
             History.id == history_id,
             History.user_id == user_id

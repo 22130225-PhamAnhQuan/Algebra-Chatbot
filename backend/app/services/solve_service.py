@@ -110,6 +110,8 @@ def _solve_ai(
             lesson_id=lesson_id
         )
 
+        graph_img = result.get("graph_image")
+
         if "steps" in result and isinstance(result["steps"], list):
             steps, latex_steps = optimize_steps_pair(
                 result["steps"],
@@ -117,7 +119,6 @@ def _solve_ai(
             )
             result["steps"] = steps
             result["steps_latex"] = latex_steps
-            graph_img = result.get("graph_image")
 
         result["solver"] = "ai"
         result["graph_image"] = graph_img

@@ -1,128 +1,60 @@
-
-from sympy import *
-from sympy.parsing.sympy_parser import (
-    parse_expr,
-    standard_transformations,
-    implicit_multiplication_application
-)
+from sympy import symbols, sympify, simplify, latex
+from app.services.solver.parser import normalize
 
 
 class EvaluateSolver:
-
     def solve(self, content: str):
+        TEX_TA_CO = "\\text{Ta có: }"
+        TEX_THAY = "\\text{- Thay }"
+        TEX_VAO = "\\text{ vào biểu thức:}"
+        TEX_GIA_TRI = "\\text{Vậy giá trị của biểu thức là: }"
 
-        steps = []
-        steps_latex = []
+        try:
+            expr_str, var_name, value = self.parse_input(content)
+            x = symbols(var_name)
 
-        expr_str, var_name, value = (
-            self.parse_input(content)
-        )
+            # Dùng normalize để biến 2x thành 2*x
+            clean_expr_str = normalize(expr_str)
+            expr = sympify(clean_expr_str)
 
-        x = symbols(var_name)
+            steps_latex = []
+            steps_latex.append(f"{TEX_TA_CO} A = {latex(expr)}")
 
-        transformations = (
-            standard_transformations +
-            (implicit_multiplication_application,)
-        )
+            steps_latex.append(f"{TEX_THAY} {var_name} = {latex(value)} {TEX_VAO}")
 
-        expr = parse_expr(
-            expr_str,
-            transformations=transformations,
-            local_dict={var_name: x}
-        )
+            substituted = expr.subs(x, value)
+            steps_latex.append(f"A = {latex(substituted)}")
 
-        steps.append("Ta có:")
-        steps.append(f"A = {expr}")
+            result = simplify(substituted)
+            if result != substituted:
+                steps_latex.append(f"= {latex(result)}")
 
-        steps.append(
-            f"Thay {var_name} = {value} vào biểu thức:"
-        )
+            steps_latex.append(f"{TEX_GIA_TRI} A = {latex(result)}")
 
-        steps_latex.append(
-            f"A={latex(expr)}"
-        )
+            return {
+                "result": f"A = {result}",
+                "latex": f"A = {latex(result)}",
+                "steps_latex": steps_latex,
+                "type": "evaluate"
+            }
 
-        substituted = expr.subs(
-            x,
-            value
-        )
-
-        steps.append(
-            f"A = {substituted}"
-        )
-
-        steps_latex.append(
-            f"A={latex(substituted)}"
-        )
-
-        result = simplify(
-            substituted
-        )
-
-        if result != substituted:
-
-            steps.append(
-                f"A = {result}"
-            )
-
-            steps_latex.append(
-                f"A={latex(result)}"
-            )
-
-        steps.append(
-            f"Vậy giá trị của biểu thức là A = {result}"
-        )
-
-        return {
-            "result": str(result),
-            "latex": latex(result),
-            "steps": steps,
-            "steps_latex": steps_latex
-        }
+        except Exception as e:
+            return {
+                "result": "Lỗi",
+                "latex": "\\text{Lỗi cú pháp}",
+                "steps_latex": [f"\\text{{Lỗi xử lý: {str(e)}}}"]
+            }
 
     def parse_input(self, content):
+        content = content.lower().replace("^", "**").replace("²", "**2")
 
-        content = (
-            content.lower()
-            .replace("^", "**")
-            .replace("²", "**2")
-        )
+        split_keyword = next((kw for kw in ["tại", "với", "khi"] if kw in content), None)
+        if not split_keyword:
+            raise Exception("Thiếu từ khóa 'tại' hoặc 'với' (VD: Tính 2x tại x=1)")
 
-        if "tại" in content:
+        expr_part, value_part = content.split(split_keyword, 1)
+        expr_part = expr_part.replace("tính giá trị biểu thức", "").replace("a=", "").replace("a =", "").strip()
 
-            expr_part, value_part = (
-                content.split("tại")
-            )
+        var_name, value_str = value_part.replace(" ", "").split("=")
 
-        elif "với" in content:
-
-            expr_part, value_part = (
-                content.split("với")
-            )
-
-        else:
-
-            raise Exception(
-                "Thiếu giá trị thay vào"
-            )
-
-        expr_part = (
-            expr_part
-            .replace("tính giá trị biểu thức", "")
-            .replace("a=", "")
-            .replace("a =", "")
-            .strip()
-        )
-
-        var_name, value = (
-            value_part
-            .replace(" ", "")
-            .split("=")
-        )
-
-        return (
-            expr_part,
-            var_name,
-            sympify(value)
-        )
-
+        return expr_part, var_name, sympify(value_str)

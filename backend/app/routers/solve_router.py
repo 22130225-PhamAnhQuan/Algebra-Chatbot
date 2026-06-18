@@ -17,6 +17,7 @@ from app.models.problem import Problem
 from app.models.solution import Solution
 from app.models.history import History
 from app.schemas.solve import SolveRequest
+from app.models.conversation import Conversation
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/solver", tags=["solver"])
@@ -91,6 +92,12 @@ def save_solution_to_db(
         logger.error(f"Lỗi khi lưu Database: {str(e)}")
         raise e
 
+def create_default_conversation(db: Session, user_id: int, problem_id: int):
+    new_conv = Conversation(user_id=user_id, problem_id=problem_id, title="Gia sư AI")
+    db.add(new_conv)
+    db.commit()
+    db.refresh(new_conv)
+    return new_conv
 
 @router.post("/solve")
 async def solve_text(
@@ -122,10 +129,13 @@ async def solve_text(
             input_type="text",
         )
 
-        image_base64 = result.get("image", None)
+        image_base64 = result.get("graph_image", None)
+
+        new_conv = create_default_conversation(db, current_user.id, saved["problem_id"])
 
         return {
             "success": True,
+            "conversation_id": new_conv.id,
             "type": result.get("problem_type", "unknown"),
             "grade_id": grade_id,
             "chapter_id": chapter_id,
@@ -189,10 +199,13 @@ async def solve_image(
             lesson_id=lesson_id
         )
 
-        image_base64 = result.get("image", None)
+        image_base64 = result.get("graph_image", None)
+
+        new_conv = create_default_conversation(db, current_user.id, saved["problem_id"])
 
         return {
             "success": True,
+            "conversation_id": new_conv.id,
             "type": result.get("problem_type", "unknown"),
             "grade_id": grade_id,
             "chapter_id": chapter_id,
@@ -206,5 +219,8 @@ async def solve_image(
         }
 
     except Exception as e:
+        logger.error(f"API /solve-image lỗi: {str(e)}")
+        if os.path.exists(file_path):
+            os.remove(file_path)
         logger.error(f"API /solve-image lỗi: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
