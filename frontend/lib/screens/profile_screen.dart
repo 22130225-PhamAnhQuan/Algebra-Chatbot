@@ -488,24 +488,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showErrorToast(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-            children: [
-              const Icon(Icons.error_outline_rounded, color: Colors.white),
-              const SizedBox(width: 10),
-              Expanded(child: Text(message))
-            ]
-        ),
-        backgroundColor: const Color(0xFFEF4444),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(20),
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
+
 
   void _showLanguageModal(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;

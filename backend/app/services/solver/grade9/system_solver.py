@@ -9,7 +9,6 @@ class SystemSolver:
 
         try:
             steps_latex = []
-            x, y = symbols("x y")
 
             eqs = [e.strip() for e in content.replace('\n', ';').split(';') if e.strip()]
 
@@ -25,29 +24,57 @@ class SystemSolver:
                 equations.append(Eq(lhs, rhs))
 
             eq1, eq2 = equations
+            
             system_latex = f"\\left\\{{\\begin{{matrix}} {latex(eq1)} \\\\ {latex(eq2)} \\end{{matrix}}\\right."
             steps_latex.append(f"{TEX_HE} {system_latex}")
 
+            # Lấy danh sách các biến tự do xuất hiện trong hệ phương trình
+            all_symbols = eq1.free_symbols.union(eq2.free_symbols)
+            vars_list = sorted(list(all_symbols), key=lambda s: s.name)
+
+            if len(vars_list) == 1:
+                var1 = vars_list[0]
+                result = solve((eq1, eq2), (var1,), dict=True)
+                if not result:
+                    steps_latex.append(r"\Rightarrow \text{Hệ phương trình vô nghiệm}")
+                    return {"result": "Vô nghiệm", "latex": r"\emptyset", "steps_latex": steps_latex, "type": "system_equation"}
+                sol = result[0]
+                v1_val = simplify(sol.get(var1, var1))
+                steps_latex.append(r"\text{Biến đổi phương trình, ta tìm được:}")
+                steps_latex.append(f"\\Leftrightarrow {var1.name} = {latex(v1_val)}")
+                steps_latex.append(f"{TEX_NGHIEM} {var1.name} = {latex(v1_val)}")
+                return {
+                    "result": f"{var1.name} = {v1_val}",
+                    "latex": f"{var1.name} = {latex(v1_val)}",
+                    "steps_latex": steps_latex,
+                    "type": "system_equation"
+                }
+
+            if len(vars_list) == 2:
+                var1, var2 = vars_list
+            else:
+                var1, var2 = symbols("x y")
+
             # Giải hệ
-            result = solve((eq1, eq2), (x, y), dict=True)
+            result = solve((eq1, eq2), (var1, var2), dict=True)
 
             if not result:
                 steps_latex.append(r"\Rightarrow \text{Hệ phương trình vô nghiệm}")
                 return {"result": "Vô nghiệm", "latex": r"\emptyset", "steps_latex": steps_latex}
 
             sol = result[0]
-            x_val = simplify(sol[x])
-            y_val = simplify(sol[y])
+            v1_val = simplify(sol.get(var1, var1))
+            v2_val = simplify(sol.get(var2, var2))
 
             steps_latex.append(r"\text{Áp dụng phương pháp giải hệ, ta tìm được:}")
             steps_latex.append(
-                f"\\Leftrightarrow \\left\\{{\\begin{{matrix}} x = {latex(x_val)} \\\\ y = {latex(y_val)} \\end{{matrix}}\\right.")
+                f"\\Leftrightarrow \\left\\{{\\begin{{matrix}} {var1.name} = {latex(v1_val)} \\\\ {var2.name} = {latex(v2_val)} \\end{{matrix}}\\right.")
 
-            steps_latex.append(f"{TEX_NGHIEM} (x; y) = ({latex(x_val)}; {latex(y_val)})")
+            steps_latex.append(f"{TEX_NGHIEM} ({var1.name}; {var2.name}) = ({latex(v1_val)}; {latex(v2_val)})")
 
             return {
-                "result": f"x = {x_val}, y = {y_val}",
-                "latex": f"(x; y) = ({latex(x_val)}; {latex(y_val)})",
+                "result": f"{var1.name} = {v1_val}, {var2.name} = {v2_val}",
+                "latex": f"({var1.name}; {var2.name}) = ({latex(v1_val)}; {latex(v2_val)})",
                 "steps_latex": steps_latex,
                 "type": "system_equation"
             }

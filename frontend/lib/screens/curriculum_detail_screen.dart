@@ -27,11 +27,13 @@ class _CurriculumDetailScreenState extends State<CurriculumDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CurriculumProvider>();
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     final LessonDetailModel? lesson = provider.lessonDetail;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: theme.colorScheme.surface,
 
       appBar: AppBar(title: const Text("Chi tiết bài học"), centerTitle: true),
 
@@ -99,12 +101,16 @@ class _CurriculumDetailScreenState extends State<CurriculumDetailScreen> {
 
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(15),
-                      color: Colors.grey.shade100,
+                      color: isDark ? Colors.grey.shade900 : Colors.grey.shade100,
                     ),
 
                     child: Text(
                       lesson.theory ?? "",
-                      style: const TextStyle(fontSize: 16, height: 1.6),
+                      style: TextStyle(
+                        fontSize: 16, 
+                        height: 1.6,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
                     ),
                   ),
 
@@ -123,13 +129,17 @@ class _CurriculumDetailScreenState extends State<CurriculumDetailScreen> {
 
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(15),
-                      color: Colors.green.shade50,
+                      color: isDark ? Colors.green.shade900.withOpacity(0.2) : Colors.green.shade50,
                     ),
 
                     child: Text(
                       lesson.example ?? "",
 
-                      style: const TextStyle(fontSize: 16, height: 1.6),
+                      style: TextStyle(
+                        fontSize: 16, 
+                        height: 1.6,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
                     ),
                   ),
                 ],

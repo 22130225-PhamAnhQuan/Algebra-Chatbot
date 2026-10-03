@@ -5,15 +5,7 @@ import '../core/constants/api_config.dart';
 
 class AuthService {
 
-  // Tự động lấy Token từ bộ nhớ (dùng cho logout)
-  static Future<Map<String, String>> _getHeaders() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token') ?? "";
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
-  }
+
 
   // ĐĂNG KÝ
   static Future<String> register({

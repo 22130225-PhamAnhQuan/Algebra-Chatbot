@@ -26,8 +26,20 @@ class _CurriculumScreenState extends State<CurriculumScreen> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CurriculumProvider>().loadGrades();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final provider = context.read<CurriculumProvider>();
+      await provider.loadGrades();
+      if (provider.grades.isNotEmpty && mounted) {
+        setState(() {
+          selectedGradeId = provider.grades.first.id;
+        });
+        await provider.loadChapters(selectedGradeId!);
+        if (mounted) {
+          setState(() {
+            filteredChapters = provider.chapters;
+          });
+        }
+      }
     });
   }
 
@@ -56,7 +68,7 @@ class _CurriculumScreenState extends State<CurriculumScreen> {
     final grades = provider.grades;
     final chapters = provider.chapters;
 
-    if (filteredChapters.isEmpty && chapters.isNotEmpty) {
+    if (_searchController.text.isEmpty && filteredChapters.isEmpty && chapters.isNotEmpty) {
       filteredChapters = chapters;
     }
 
@@ -182,11 +194,14 @@ class _CurriculumScreenState extends State<CurriculumScreen> {
 
                 await context.read<CurriculumProvider>().loadChapters(grade.id);
 
-                setState(() {
-                  filteredChapters = context
-                      .read<CurriculumProvider>()
-                      .chapters;
-                });
+                if (mounted) {
+                  setState(() {
+                    _searchController.clear();
+                    filteredChapters = context
+                        .read<CurriculumProvider>()
+                        .chapters;
+                  });
+                }
               },
 
               child: AnimatedContainer(

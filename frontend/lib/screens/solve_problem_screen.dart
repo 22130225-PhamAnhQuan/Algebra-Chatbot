@@ -5,6 +5,7 @@ import 'package:algebra_chatbot/providers/solver_provider.dart';
 import 'package:algebra_chatbot/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:provider/provider.dart';
 
 import '../core/theme/app_theme.dart';
@@ -362,6 +363,39 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
     );
   }
 
+  Future<File?> _cropImage(File imageFile) async {
+    CroppedFile? croppedFile = await ImageCropper().cropImage(
+      sourcePath: imageFile.path,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Cắt ảnh bài toán',
+          toolbarColor: AppColors.primary,
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.original,
+          lockAspectRatio: false,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio16x9
+          ],
+        ),
+        IOSUiSettings(
+          title: 'Cắt ảnh bài toán',
+          aspectRatioPresets: [
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio16x9
+          ],
+        ),
+      ],
+    );
+    return croppedFile != null ? File(croppedFile.path) : null;
+  }
+
   Widget _cameraActionBtn({
     required String label,
     required IconData icon,
@@ -380,8 +414,11 @@ class _SolveProblemScreenState extends State<SolveProblemScreen> {
 
             if (image == null) return;
 
+            final File? cropped = await _cropImage(File(image.path));
+            if (cropped == null) return;
+
             setState(() {
-              _selectedImage = File(image.path);
+              _selectedImage = cropped;
             });
           } catch (e) {
             _showMsg("Không thể chọn ảnh");

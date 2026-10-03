@@ -161,11 +161,12 @@ async def solve_image(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
+    file_path = None
     try:
-        # Tải ảnh và lưu tạm vào thư mục uploads
-        os.makedirs("uploads", exist_ok=True)
+        # Tải ảnh và lưu tạm vào thư mục static/uploads
+        os.makedirs("static/uploads", exist_ok=True)
         filename = f"{uuid.uuid4()}.png"
-        file_path = f"uploads/{filename}"
+        file_path = f"static/uploads/{filename}"
 
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
@@ -193,12 +194,13 @@ async def solve_image(
             content=latex_content,
             result=result,
             input_type="image",
-            image_url=f"/uploads/{filename}",
+            image_url=f"/static/uploads/{filename}",
             grade_id=grade_id,
             chapter_id=chapter_id,
             lesson_id=lesson_id
         )
 
+        # ... (logic mapping variables / graphs)
         image_base64 = result.get("graph_image", None)
 
         new_conv = create_default_conversation(db, current_user.id, saved["problem_id"])
@@ -212,7 +214,7 @@ async def solve_image(
             "lesson_id": lesson_id,
             "problem_id": saved["problem_id"],
             "solution_id": saved["solution_id"],
-            "image_url": f"/uploads/{filename}",
+            "image_url": f"/static/uploads/{filename}",
             "input": latex_content,
             "solution": result,
             "graph_image": image_base64
@@ -220,7 +222,8 @@ async def solve_image(
 
     except Exception as e:
         logger.error(f"API /solve-image lỗi: {str(e)}")
-        if os.path.exists(file_path):
+        if file_path and os.path.exists(file_path):
             os.remove(file_path)
-        logger.error(f"API /solve-image lỗi: {str(e)}")
+        if isinstance(e, HTTPException):
+            raise e
         raise HTTPException(status_code=500, detail=str(e))

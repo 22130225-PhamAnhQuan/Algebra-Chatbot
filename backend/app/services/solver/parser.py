@@ -12,7 +12,26 @@ transformations = (
 )
 
 
+def latex_to_python_syntax(text: str) -> str:
+    # 1. Thay thế các nhóm \frac{a}{b} thành ((a)/(b)) đệ quy
+    pattern_frac = r'\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}'
+    while regex.search(pattern_frac, text):
+        text = regex.sub(pattern_frac, r'((\1)/(\2))', text)
+        
+    # 2. Thay thế \sqrt{a} thành ((a)**(0.5)) đệ quy
+    pattern_sqrt = r'\\sqrt\s*\{([^{}]+)\}'
+    while regex.search(pattern_sqrt, text):
+        text = regex.sub(pattern_sqrt, r'((\1)**(0.5))', text)
+        
+    # 3. Loại bỏ các ký tự rác LaTeX khác
+    text = text.replace(r"\left(", "(").replace(r"\right)", ")")
+    text = text.replace(r"\left[", "[").replace(r"\right]", "]")
+    text = text.replace(r"\cdot", "*")
+    return text
+
+
 def normalize(text: str):
+    text = latex_to_python_syntax(text)
     text = text.lower()
 
     text = regex.sub(r'(\d+)\\times([\+\-\/\)\=])', r'\1*x\2', text)
