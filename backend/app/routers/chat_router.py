@@ -44,7 +44,14 @@ def send_message(
     )
 
     # 2. Kiểm tra nếu AI trả về thông báo lỗi hệ thống thì không lưu vào DB
-    if "lỗi" in ai_response.lower() or "không khả dụng" in ai_response.lower():
+    system_errors = [
+        "có lỗi khi xử lý ngữ cảnh bài toán",
+        "không tìm thấy dữ liệu cuộc hội thoại",
+        "gia sư ai hiện không khả dụng",
+        "có lỗi xảy ra trong quá trình suy luận",
+        "vui lòng kiểm tra lại kết nối ai"
+    ]
+    if any(err in ai_response.lower() for err in system_errors):
         return {"response": ai_response}
 
     # 3. Nếu AI xử lý thành công, lưu cả tin nhắn của User và AI vào DB
@@ -79,3 +86,13 @@ def get_messages(
         .all()
     )
     return messages
+
+
+# Route tương thích ngược cho file APK cũ (do lỗi trùng lặp /chat/chat trên app)
+@router.get("/chat/messages/{conversation_id}", response_model=list[MessageResponse])
+def get_messages_compat(
+        conversation_id: int,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
+):
+    return get_messages(conversation_id=conversation_id, db=db, current_user=current_user)

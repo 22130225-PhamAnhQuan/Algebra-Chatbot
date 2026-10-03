@@ -58,12 +58,14 @@ def google_auth(req: GoogleAuthRequest, db: Session = Depends(get_db)):
 
         # 4. Đăng nhập và tạo JWT Access Token
         from app.core.security import create_access_token
-        access_token = create_access_token(data={"sub": user.email})
+        access_token = create_access_token(data={"user_id": user.id})
 
         return {"access_token": access_token, "token_type": "bearer"}
 
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Token Google không hợp lệ")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Token Google không hợp lệ: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lỗi hệ thống xác thực Google: {str(e)}")
 
 @router.post("/forgot-password")
 def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):

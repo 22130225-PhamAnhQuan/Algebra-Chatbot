@@ -12,6 +12,7 @@ class Grade7Solver:
             "polynomial": PolynomialSimplifySolver(),
             "evaluate": EvaluateSolver(),
             "proportional": ProportionSolver(),
+            "proportion": ProportionSolver(),
             "direct_inverse": DirectInverseSolver(),
             "graph": GraphSolver(),
             "simplify": SimplifySolver(),

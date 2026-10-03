@@ -3,6 +3,7 @@ from app.services.solver.grade9.system_solver import SystemSolver
 from app.services.solver.grade9.inequality_solver import InequalitySolver
 from app.services.solver.grade8.rational_solver import RationalEquationSolver
 from app.services.solver.graph.graph_solver import GraphSolver
+from app.services.solver.linear_solver import LinearSolver
 from app.services.solver.grade9.detect import detect_grade9_type
 
 class Grade9Solver:
@@ -13,6 +14,7 @@ class Grade9Solver:
             "inequality": InequalitySolver(),
             "graph": GraphSolver(),
             "rational": RationalEquationSolver(),
+            "linear": LinearSolver(),
         }
 
     def solve(self, content: str, problem_type: str = None):

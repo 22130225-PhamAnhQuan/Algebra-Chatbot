@@ -10,8 +10,9 @@ from app.models.user import User
 from app.models.problem import Problem
 from app.models.solution import Solution
 from app.models.history import History
-from app.schemas.curriculum import LessonDetailResponse
+from app.schemas.curriculum import LessonDetailResponse, LessonCreate, LessonUpdate
 from app.services.curriculum_service import get_lesson_by_id
+from app.routers.curriculum_router import clean_math_text
 
 try:
     from app.models.formula import Formula
@@ -176,23 +177,25 @@ def admin_get_ai_logs(
         raise HTTPException(status_code=500, detail="Hệ thống chưa cấu hình ORM Model cho bảng ai_logs")
 
     logs = db.query(AILog).order_by(desc(AILog.created_at)).limit(limit).all()
+    result_list = []
+    for log in logs:
+        user = db.query(User).filter(User.id == log.user_id).first()
+        result_list.append({
+            "id": log.id,
+            "user_id": log.user_id,
+            "user_name": user.name if user else "Học sinh ẩn danh",
+            "problem_id": log.problem_id,
+            "input": log.input,
+            "output": log.output,
+            "model": log.model,
+            "latency_ms": log.latency_ms,
+            "status": log.status,
+            "tokens_used": log.tokens_used,
+            "created_at": log.created_at
+        })
     return {
         "success": True,
-        "data": [
-            {
-                "id": log.id,
-                "user_id": log.user_id,
-                "user_name": log.name,
-                "problem_id": log.problem_id,
-                "input": log.input,
-                "output": log.output,
-                "model": log.model,
-                "latency_ms": log.latency_ms,
-                "status": log.status,
-                "tokens_used": log.tokens_used,
-                "created_at": log.created_at
-            } for log in logs
-        ]
+        "data": result_list
     }
 
 @router.get("/histories")
@@ -321,24 +324,19 @@ def admin_get_lessons(
         ]
     }
 
-@router.post("/lessons")
+@router.post("/lessons", status_code=201)
 def admin_create_lesson(
-    chapter_id: int,
-    lesson_number: int,
-    title: str,
-    theory: str = "",
-    formula: str = "",
-    example: str = "",
+    req: LessonCreate,
     db: Session = Depends(get_db),
     admin: User = Depends(get_current_admin)
 ):
     lesson = Lesson(
-        chapter_id=chapter_id,
-        lesson_number=lesson_number,
-        title=title,
-        theory=theory,
-        formula=formula,
-        example=example
+        chapter_id=req.chapter_id,
+        lesson_number=req.lesson_number,
+        title=req.title,
+        theory=req.theory or "",
+        formula=req.formula or "",
+        example=req.example or ""
     )
 
     db.add(lesson)
@@ -353,13 +351,23 @@ def admin_create_lesson(
         }
     }
 
+# Route tương thích ngược cho file APK cũ (gọi sai path và yêu cầu mã 201)
+@router.post("/curriculum/lessons", status_code=201)
+def admin_create_lesson_compat(
+    req: LessonCreate,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin)
+):
+    return admin_create_lesson(req=req, db=db, admin=admin)
+
 @router.get(
     "/lessons/{lesson_id}",
     response_model=LessonDetailResponse
 )
 def get_lesson_detail(
     lesson_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin)
 ):
 
     lesson = get_lesson_by_id(
@@ -373,16 +381,27 @@ def get_lesson_detail(
             detail="Lesson not found"
         )
 
-    return lesson
+    theory_content = lesson.theory or ""
+    if lesson.formula:
+        theory_content += f"\n\n[Công thức cần nhớ]\n{lesson.formula}"
+
+    cleaned_theory = clean_math_text(theory_content)
+    cleaned_formula = clean_math_text(lesson.formula)
+    cleaned_example = clean_math_text(lesson.example)
+
+    return {
+        "id": lesson.id,
+        "lesson_number": lesson.lesson_number,
+        "title": lesson.title,
+        "theory": cleaned_theory,
+        "formula": cleaned_formula,
+        "example": cleaned_example
+    }
 
 @router.put("/lessons/{lesson_id}")
 def admin_update_lesson(
     lesson_id: int,
-    lesson_number: int | None = None,
-    title: str | None = None,
-    theory: str | None = None,
-    formula: str | None = None,
-    example: str | None = None,
+    req: LessonUpdate,
     db: Session = Depends(get_db),
     admin: User = Depends(get_current_admin)
 ):
@@ -400,20 +419,20 @@ def admin_update_lesson(
             detail="Không tìm thấy bài học"
         )
 
-    if lesson_number is not None:
-        lesson.lesson_number = lesson_number
+    if req.lesson_number is not None:
+        lesson.lesson_number = req.lesson_number
 
-    if title is not None:
-        lesson.title = title
+    if req.title is not None:
+        lesson.title = req.title
 
-    if theory is not None:
-        lesson.theory = theory
+    if req.theory is not None:
+        lesson.theory = req.theory
 
-    if formula is not None:
-        lesson.formula = formula
+    if req.formula is not None:
+        lesson.formula = req.formula
 
-    if example is not None:
-        lesson.example = example
+    if req.example is not None:
+        lesson.example = req.example
 
     db.commit()
     db.refresh(lesson)

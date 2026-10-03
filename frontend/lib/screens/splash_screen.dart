@@ -1,8 +1,10 @@
 // lib/screens/splash_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme/app_theme.dart';
 import 'login_screen.dart';
+import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -73,10 +75,19 @@ class _SplashScreenState extends State<SplashScreen>
     _loadingController.forward();
     await Future.delayed(const Duration(milliseconds: 2000));
     if (mounted) {
+      final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
+      final token = prefs.getString('token') ?? "";
+
+      Widget nextScreen = const LoginScreen();
+      if (token.isNotEmpty) {
+        nextScreen = const HomeScreen();
+      }
+
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
-          pageBuilder: (_, a, __) => const LoginScreen(),
+          pageBuilder: (_, a, __) => nextScreen,
           transitionsBuilder: (_, animation, __, child) => FadeTransition(
             opacity: animation,
             child: child,

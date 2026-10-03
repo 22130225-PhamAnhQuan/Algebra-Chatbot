@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from app.db.database import get_db
@@ -25,4 +25,4 @@ def delete_history(
     success = HistoryService.delete_history_item(db, history_id, current_user.id)
     if success:
         return {"status": "success", "message": "Đã xóa lịch sử"}
-    return {"status": "error", "message": "Không tìm thấy hoặc không có quyền xóa"}, 404
+    raise HTTPException(status_code=404, detail="Không tìm thấy hoặc không có quyền xóa")
